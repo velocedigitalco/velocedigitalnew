@@ -1,0 +1,135 @@
+---
+import type { CTA } from '../../lib/sanity';
+
+interface Props {
+  heading: string;
+  subheading: string;
+  ctaPrimary: CTA;
+  ctaSecondary: CTA;
+}
+
+const { heading, subheading, ctaPrimary, ctaSecondary } = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero__aura" data-hero-aura aria-hidden="true"></div>
+
+  <div class="container hero__inner">
+    <p class="eyebrow">Web Development Agency — Lahore, PK</p>
+    <h1 class="hero__heading" data-hero-heading>{heading}</h1>
+    <p class="hero__subheading" data-hero-subheading>{subheading}</p>
+    <div class="hero__ctas" data-hero-ctas>
+      <a class="btn btn--primary" href={ctaPrimary.url}>{ctaPrimary.label}</a>
+      <a class="btn btn--secondary" href={ctaSecondary.url}>{ctaSecondary.label}</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(SplitText);
+
+  const headingEl = document.querySelector('[data-hero-heading]');
+  const subheadingEl = document.querySelector('[data-hero-subheading]');
+  const ctasEl = document.querySelector('[data-hero-ctas]');
+  const auraEl = document.querySelector('[data-hero-aura]');
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Sequential staggered reveal: heading words, then subheading
+  // "immediately after", then the CTAs — in order of importance.
+  if (
+    headingEl instanceof HTMLElement &&
+    subheadingEl instanceof HTMLElement &&
+    ctasEl instanceof HTMLElement &&
+    !prefersReducedMotion
+  ) {
+    const split = SplitText.create(headingEl, { type: 'words' });
+
+    gsap
+      .timeline({ defaults: { ease: 'power4.out' } })
+      .from(split.words, {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+      })
+      .from(
+        subheadingEl,
+        { y: 20, opacity: 0, duration: 0.7 },
+        '-=0.45'
+      )
+      .from(
+        Array.from(ctasEl.children),
+        { y: 12, opacity: 0, duration: 0.6, stagger: 0.12 },
+        '-=0.25'
+      );
+  }
+
+  // Ambient drift on the background aura — cinematic atmosphere, not decoration.
+  if (auraEl instanceof HTMLElement && !prefersReducedMotion) {
+    gsap.to(auraEl, {
+      x: '+=60',
+      y: '-=40',
+      duration: 9,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-block: var(--section-pad);
+  }
+
+  .hero__aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    width: min(70rem, 140vw);
+    height: min(70rem, 140vw);
+    transform: translate(-50%, -50%);
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255, 83, 53, 0.35), transparent 55%),
+      radial-gradient(circle at 70% 65%, rgba(124, 92, 255, 0.28), transparent 55%);
+    filter: blur(70px);
+    pointer-events: none;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 50rem;
+  }
+
+  .hero__heading {
+    margin-top: var(--space-3);
+    font-size: var(--fs-hero);
+    font-weight: 700;
+    color: var(--color-paper);
+  }
+
+  .hero__subheading {
+    margin-top: var(--space-3);
+    max-width: 36ch;
+    font-size: var(--fs-body-lg);
+    color: var(--color-steel);
+  }
+
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+</style>
