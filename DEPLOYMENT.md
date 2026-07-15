@@ -1,4 +1,4 @@
-# Deploying Veloce Digital
+# Deploying Veloce Digital.
 
 One repo, two Cloudflare Pages projects, both via "Connect to Git" (classic
 Pages, not Workers-with-assets) — matches the stack notes in the blueprint.
