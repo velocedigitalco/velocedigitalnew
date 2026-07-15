@@ -29,7 +29,7 @@ const year = new Date().getFullYear();
       </ul>
     </nav>
 
-    {settings.socialLinks.length > 0 && (
+    {(settings.socialLinks ?? []).length > 0 && (
       <div class="site-footer__col">
         <p class="eyebrow">Elsewhere</p>
         <ul>

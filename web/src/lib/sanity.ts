@@ -77,37 +77,42 @@ const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
   heroSubheading,
   ctaPrimary,
   ctaSecondary,
-  capabilityCards[]{
+  "capabilityCards": coalesce(capabilityCards[]{
     title,
     description,
     icon
-  }
+  }, [])
 }`;
 
 // asset-> dereferences the image asset document so we get its CDN url and
 // dimensions directly from the query API - no @sanity/image-url needed.
+// Every array field is wrapped in coalesce(..., []): GROQ returns null,
+// not [], when a field was never touched in Studio (this is exactly what
+// broke the first deploy -- socialLinks is optional and nobody had added
+// one yet, so settings.socialLinks.length crashed on null).
 const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0]{
   logo{
     "url": asset->url,
     "width": asset->metadata.dimensions.width,
     "height": asset->metadata.dimensions.height
   },
-  navLinks[]{label, href},
+  "navLinks": coalesce(navLinks[]{label, href}, []),
   email,
   phone,
   location,
-  socialLinks[]{platform, url}
+  "socialLinks": coalesce(socialLinks[]{platform, url}, [])
 }`;
 
 // Newest first. The "_type == 'image' => {...}" conditional projection
 // only dereferences the asset for image items in the body array, leaving
-// text blocks untouched via the "..." spread.
+// text blocks untouched via the "..." spread. Every array field coalesced
+// to [] for the same reason as SITE_SETTINGS_QUERY above.
 const CASE_STUDIES_QUERY = `*[_type == "caseStudy"] | order(_createdAt desc){
   clientName,
   year,
   shortDescription,
-  services,
-  stack,
+  "services": coalesce(services, []),
+  "stack": coalesce(stack, []),
   cms,
   liveUrl,
   thumbnail{
@@ -115,7 +120,7 @@ const CASE_STUDIES_QUERY = `*[_type == "caseStudy"] | order(_createdAt desc){
     "width": asset->metadata.dimensions.width,
     "height": asset->metadata.dimensions.height
   },
-  body[]{
+  "body": coalesce(body[]{
     ...,
     _type == "image" => {
       "url": asset->url,
@@ -123,7 +128,7 @@ const CASE_STUDIES_QUERY = `*[_type == "caseStudy"] | order(_createdAt desc){
       "height": asset->metadata.dimensions.height,
       "alt": alt
     }
-  }
+  }, [])
 }`;
 
 interface QueryResponse<T> {
