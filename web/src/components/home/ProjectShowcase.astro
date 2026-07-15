@@ -1,0 +1,432 @@
+---
+import type { CaseStudy } from '../../lib/sanity';
+import { renderPortableText } from '../../lib/portableText';
+
+interface Props {
+  caseStudies: CaseStudy[];
+}
+
+const { caseStudies } = Astro.props;
+---
+
+{
+  caseStudies.length > 0 && (
+    <section class="showcase">
+      <div class="container">
+        <p class="eyebrow">Featured Work</p>
+        <h2 class="showcase__heading">Projects we've shipped</h2>
+      </div>
+
+      <div class="showcase__track-wrap" data-showcase-wrap>
+        <div class="showcase__track" data-showcase-track>
+          {[...caseStudies, ...caseStudies].map((study, i) => (
+            <button
+              class="showcase-card"
+              type="button"
+              data-showcase-card
+              data-case-index={i % caseStudies.length}
+              aria-haspopup="dialog"
+            >
+              <img
+                class="showcase-card__image"
+                src={study.thumbnail.url}
+                width={study.thumbnail.width}
+                height={study.thumbnail.height}
+                alt=""
+                loading="lazy"
+              />
+              <span class="showcase-card__client">{study.clientName}</span>
+              <span class="showcase-card__desc">{study.shortDescription}</span>
+              <span class="showcase-card__cta">Read full case study →</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div class="case-modal-backdrop" data-case-backdrop hidden />
+
+      {caseStudies.map((study, index) => (
+        <div class="case-modal" data-case-modal data-case-index={index} hidden role="dialog" aria-modal="true" aria-label={`${study.clientName} case study`}>
+          <div class="case-modal__panel" data-case-panel>
+            <button class="case-modal__close" type="button" data-case-close aria-label="Close case study">
+              <span aria-hidden="true">&times;</span>
+            </button>
+
+            <div class="case-modal__scroll">
+              <img
+                class="case-modal__hero"
+                src={study.thumbnail.url}
+                width={study.thumbnail.width}
+                height={study.thumbnail.height}
+                alt={`${study.clientName} project`}
+              />
+
+              <div class="case-modal__meta">
+                <div>
+                  <dt>Client</dt>
+                  <dd>{study.clientName}</dd>
+                </div>
+                <div>
+                  <dt>Year</dt>
+                  <dd>{study.year}</dd>
+                </div>
+                <div>
+                  <dt>Services</dt>
+                  <dd>{study.services.join(', ')}</dd>
+                </div>
+                <div>
+                  <dt>Stack</dt>
+                  <dd>{study.stack.join(', ')}</dd>
+                </div>
+                {study.cms && (
+                  <div>
+                    <dt>CMS</dt>
+                    <dd>{study.cms}</dd>
+                  </div>
+                )}
+                {study.liveUrl && (
+                  <div>
+                    <dt>Link</dt>
+                    <dd>
+                      <a href={study.liveUrl} target="_blank" rel="noopener noreferrer">
+                        {study.liveUrl}
+                      </a>
+                    </dd>
+                  </div>
+                )}
+              </div>
+
+              <div class="case-modal__body" set:html={renderPortableText(study.body)} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </section>
+  )
+}
+
+<script>
+  import gsap from 'gsap';
+  import { Flip } from 'gsap/Flip';
+
+  gsap.registerPlugin(Flip);
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Continuous marquee (right to left), pauses on hover ----------
+  const wrap = document.querySelector('[data-showcase-wrap]');
+  const track = document.querySelector('[data-showcase-track]');
+  let marqueeTween: gsap.core.Tween | null = null;
+
+  if (wrap instanceof HTMLElement && track instanceof HTMLElement) {
+    const setUpMarquee = () => {
+      marqueeTween?.kill();
+      const halfWidth = track.scrollWidth / 2;
+
+      if (prefersReducedMotion || halfWidth === 0) return;
+
+      gsap.set(track, { x: 0 });
+      marqueeTween = gsap.to(track, {
+        x: -halfWidth,
+        duration: halfWidth / 55,
+        ease: 'none',
+        repeat: -1,
+      });
+    };
+
+    setUpMarquee();
+    window.addEventListener('resize', setUpMarquee);
+
+    wrap.addEventListener('mouseenter', () => marqueeTween?.pause());
+    wrap.addEventListener('mouseleave', () => marqueeTween?.resume());
+    wrap.addEventListener('focusin', () => marqueeTween?.pause());
+    wrap.addEventListener('focusout', () => marqueeTween?.resume());
+  }
+
+  // ---------- Card -> modal morph (GSAP Flip) ----------
+  const backdrop = document.querySelector('[data-case-backdrop]');
+  const cards = Array.from(document.querySelectorAll('[data-showcase-card]'));
+  let activeIndex: number | null = null;
+
+  function getModal(index: number) {
+    return document.querySelector(`[data-case-modal][data-case-index="${index}"]`);
+  }
+
+  function openCase(index: number, originCard: Element) {
+    const modal = getModal(index);
+    const panel = modal?.querySelector('[data-case-panel]');
+    if (!(modal instanceof HTMLElement) || !(panel instanceof HTMLElement)) return;
+
+    activeIndex = index;
+
+    modal.hidden = false;
+    if (backdrop instanceof HTMLElement) backdrop.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    if (prefersReducedMotion) {
+      panel.focus();
+      return;
+    }
+
+    marqueeTween?.pause();
+
+    // Snap the panel to the clicked card's box, capture that as the "from"
+    // state, then let CSS put it back into its natural full-modal layout
+    // and animate FROM the snapped/card-sized state TO that natural one.
+    Flip.fit(panel, originCard, { absolute: true, scale: true });
+    const state = Flip.getState(panel);
+    gsap.set(panel, { clearProps: 'all' });
+
+    Flip.from(state, {
+      duration: 0.65,
+      ease: 'power3.inOut',
+      absolute: true,
+      onComplete: () => panel.focus(),
+    });
+
+    gsap.from(modal, { autoAlpha: 0, duration: 0.3 });
+  }
+
+  function closeCase() {
+    if (activeIndex === null) return;
+    const index = activeIndex;
+    const modal = getModal(index);
+    const panel = modal?.querySelector('[data-case-panel]');
+    const originCard = cards.find(
+      (card) => card.getAttribute('data-case-index') === String(index)
+    );
+
+    if (!(modal instanceof HTMLElement) || !(panel instanceof HTMLElement) || !originCard) {
+      if (modal instanceof HTMLElement) modal.hidden = true;
+      activeIndex = null;
+      return;
+    }
+
+    document.body.style.overflow = '';
+    marqueeTween?.resume();
+
+    if (prefersReducedMotion) {
+      modal.hidden = true;
+      if (backdrop instanceof HTMLElement) backdrop.hidden = true;
+      activeIndex = null;
+      return;
+    }
+
+    const state = Flip.getState(panel);
+    Flip.fit(panel, originCard, { absolute: true, scale: true });
+
+    Flip.from(state, {
+      duration: 0.5,
+      ease: 'power3.inOut',
+      absolute: true,
+      onComplete: () => {
+        modal.hidden = true;
+        if (backdrop instanceof HTMLElement) backdrop.hidden = true;
+        gsap.set(panel, { clearProps: 'all' });
+        activeIndex = null;
+      },
+    });
+  }
+
+  cards.forEach((card) => {
+    card.addEventListener('click', () => {
+      const index = Number(card.getAttribute('data-case-index'));
+      openCase(index, card);
+    });
+  });
+
+  document.querySelectorAll('[data-case-close]').forEach((btn) => {
+    btn.addEventListener('click', closeCase);
+  });
+
+  backdrop?.addEventListener('click', closeCase);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && activeIndex !== null) closeCase();
+  });
+</script>
+
+<style>
+  .showcase {
+    padding-block: var(--section-pad);
+  }
+
+  .showcase__heading {
+    margin-top: var(--space-2);
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .showcase__track-wrap {
+    overflow: hidden;
+    margin-top: var(--space-5);
+  }
+
+  .showcase__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .showcase-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: min(22rem, 80vw);
+    flex-shrink: 0;
+    margin-right: var(--space-3);
+    padding: var(--space-3);
+    text-align: left;
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .showcase-card:hover,
+  .showcase-card:focus-visible {
+    border-color: var(--color-flare);
+  }
+
+  .showcase-card__image {
+    width: 100%;
+    height: 14rem;
+    object-fit: cover;
+  }
+
+  .showcase-card__client {
+    display: block;
+    margin-top: var(--space-3);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .showcase-card__desc {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-steel);
+  }
+
+  .showcase-card__cta {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-flare);
+  }
+
+  /* ---------- Modal ---------- */
+  .case-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(3, 3, 4, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .case-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 91;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--gutter);
+    pointer-events: none;
+  }
+
+  .case-modal__panel {
+    position: relative;
+    width: min(52rem, 100%);
+    max-height: min(85vh, 54rem);
+    overflow: hidden;
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    pointer-events: auto;
+  }
+
+  .case-modal__scroll {
+    max-height: min(85vh, 54rem);
+    overflow-y: auto;
+    padding-bottom: var(--space-4);
+  }
+
+  .case-modal__close {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 2;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-paper);
+    background: rgba(7, 8, 11, 0.6);
+    border: 1px solid var(--color-hairline);
+  }
+
+  .case-modal__hero {
+    width: 100%;
+    height: 18rem;
+    object-fit: cover;
+  }
+
+  .case-modal__meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--gutter) 0;
+  }
+
+  .case-modal__meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-steel-dim);
+  }
+
+  .case-modal__meta dd {
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    color: var(--color-paper);
+  }
+
+  .case-modal__body {
+    margin-top: var(--space-4);
+    padding-inline: var(--gutter);
+    color: var(--color-steel);
+    line-height: 1.7;
+  }
+
+  .case-modal__body :global(p) {
+    margin-top: var(--space-2);
+  }
+
+  .case-modal__body :global(img) {
+    margin-top: var(--space-3);
+    width: 100%;
+    height: auto;
+  }
+
+  .case-modal__body :global(h2),
+  .case-modal__body :global(h3),
+  .case-modal__body :global(h4) {
+    margin-top: var(--space-4);
+    font-family: var(--font-display);
+    color: var(--color-paper);
+  }
+
+  @media (min-width: 40rem) {
+    .case-modal__meta {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

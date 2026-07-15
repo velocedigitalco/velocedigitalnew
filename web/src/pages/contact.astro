@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../lib/sanity';
+
+const settings = await getSiteSettings();
+---
+
+<BaseLayout title="Contact — Veloce Digital" description="Get in touch with Veloce Digital.">
+  <section class="container stub">
+    <p class="eyebrow">Contact</p>
+    <h1>Let's build something</h1>
+    <p>A full contact form is on its way — for now, reach us directly:</p>
+    <a class="stub__email" href={`mailto:${settings.email}`}>{settings.email}</a>
+    {settings.phone && <p class="stub__detail">{settings.phone}</p>}
+    <p class="stub__detail">{settings.location}</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .stub {
+    padding-block: var(--section-pad);
+    max-width: 40rem;
+  }
+
+  .stub h1 {
+    margin-top: var(--space-2);
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .stub p:nth-of-type(2) {
+    margin-top: var(--space-3);
+    font-size: var(--fs-body-lg);
+    color: var(--color-steel);
+  }
+
+  .stub__email {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    color: var(--color-flare);
+  }
+
+  .stub__detail {
+    margin-top: 0.5rem;
+    color: var(--color-steel);
+  }
+</style>

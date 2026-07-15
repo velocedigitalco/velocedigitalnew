@@ -1,0 +1,87 @@
+---
+import type { CapabilityCard } from '../../lib/sanity';
+
+interface Props {
+  cards: CapabilityCard[];
+}
+
+const { cards } = Astro.props;
+const items = cards.map((card) => card.title.toUpperCase());
+---
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track" data-marquee-track>
+    <div class="marquee__group">
+      {items.map((item) => <span>{item}</span>)}
+    </div>
+    <div class="marquee__group">
+      {items.map((item) => <span>{item}</span>)}
+    </div>
+  </div>
+</div>
+
+<script>
+  import gsap from 'gsap';
+
+  const track = document.querySelector('[data-marquee-track]');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (track instanceof HTMLElement && !prefersReducedMotion) {
+    const group = track.querySelector('.marquee__group');
+
+    if (group instanceof HTMLElement) {
+      // Translate by exactly one group's width, then repeat — since the
+      // second group is an identical copy, the loop point is invisible.
+      const width = group.getBoundingClientRect().width;
+
+      gsap.to(track, {
+        x: -width,
+        duration: width / 60, // roughly constant px/sec regardless of how much text there is
+        ease: 'none',
+        repeat: -1,
+      });
+    }
+  }
+</script>
+
+<style>
+  .marquee {
+    position: relative;
+    overflow: hidden;
+    border-block: 1px solid var(--color-hairline);
+    padding-block: var(--space-2);
+  }
+
+  .marquee__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .marquee__group {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .marquee__group span {
+    padding-inline: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--color-steel);
+    white-space: nowrap;
+  }
+
+  .marquee__group span::after {
+    content: '—';
+    margin-left: var(--space-3);
+    color: var(--color-hairline);
+  }
+
+  /* Static fallback: one copy of the text, no duplicate, no motion. */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__group:nth-child(2) {
+      display: none;
+    }
+  }
+</style>

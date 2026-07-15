@@ -1,0 +1,266 @@
+---
+import CapabilityIcon from '../icons/CapabilityIcon.astro';
+import type { CapabilityCard } from '../../lib/sanity';
+
+interface Props {
+  cards: CapabilityCard[];
+}
+
+const { cards } = Astro.props;
+---
+
+<section class="capability">
+  <div class="container">
+    <p class="eyebrow">What We Do</p>
+    <h2 class="capability__heading" data-capability-heading>Four disciplines. One studio.</h2>
+
+    <ol class="capability-sequence" data-capability-sequence>
+      <svg
+        class="capability-sequence__thread"
+        viewBox="0 0 40 400"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="thread-gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" style="stop-color: var(--color-violet)" />
+            <stop offset="100%" style="stop-color: var(--color-redline)" />
+          </linearGradient>
+        </defs>
+        <path
+          data-thread-path
+          d="M20 6 C 6 90, 34 140, 20 200 C 6 260, 34 310, 20 394"
+          fill="none"
+          stroke="url(#thread-gradient)"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+
+      {
+        cards.map((card, index) => (
+          <li class="capability-row" data-capability-card>
+            <div class="capability-row__glow" data-card-glow aria-hidden="true" />
+            <span class="capability-row__index" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div class="capability-row__icon">
+              <CapabilityIcon name={card.icon} />
+            </div>
+            <div class="capability-row__text">
+              <h3 class="capability-row__title">{card.title}</h3>
+              <p class="capability-row__description">{card.description}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  const headingEl = document.querySelector('[data-capability-heading]');
+  const sequence = document.querySelector('[data-capability-sequence]');
+  const threadPath = document.querySelector('[data-thread-path]');
+  const rows = Array.from(document.querySelectorAll('[data-capability-card]'));
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  // Scroll-triggered entrance — same word-reveal grammar as the hero,
+  // picked up again as this section reaches the viewport.
+  if (headingEl instanceof HTMLElement && !prefersReducedMotion) {
+    const split = SplitText.create(headingEl, { type: 'words' });
+
+    gsap.timeline({
+      defaults: { ease: 'power4.out' },
+      scrollTrigger: {
+        trigger: headingEl,
+        start: 'top 85%',
+        once: true,
+      },
+    })
+      .from(split.words, { y: 26, opacity: 0, duration: 0.7, stagger: 0.08 })
+      .from(rows, { y: 40, opacity: 0, duration: 0.8, stagger: 0.12 }, '-=0.35');
+  }
+
+  // The connecting thread draws in as you scroll past the sequence, rather
+  // than appearing all at once — it's tied to scroll position (scrub), so
+  // the line's progress always matches how far through the four disciplines
+  // you've actually scrolled. Same dash-offset technique as any hand-drawn
+  // SVG reveal, no DrawSVGPlugin needed for a single path this simple.
+  if (
+    threadPath instanceof SVGPathElement &&
+    sequence instanceof HTMLElement &&
+    !prefersReducedMotion
+  ) {
+    const length = threadPath.getTotalLength();
+    gsap.set(threadPath, { strokeDasharray: length, strokeDashoffset: length });
+
+    gsap.to(threadPath, {
+      strokeDashoffset: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: sequence,
+        start: 'top 75%',
+        end: 'bottom 60%',
+        scrub: 0.6,
+      },
+    });
+  }
+
+  // Hover: the row under the cursor gets a soft spotlight that tracks the
+  // pointer; the others dim slightly so attention settles on one row at a
+  // time. No magnetic offset here (unlike the old grid) — full-width rows
+  // shifting position on hover reads as a glitch, not a flourish.
+  if (rows.length && supportsHover && !prefersReducedMotion) {
+    rows.forEach((row) => {
+      if (!(row instanceof HTMLElement)) return;
+
+      const glow = row.querySelector('[data-card-glow]');
+      const setGlowX = glow ? gsap.quickTo(glow, 'x', { duration: 0.35, ease: 'power3' }) : null;
+      const setGlowY = glow ? gsap.quickTo(glow, 'y', { duration: 0.35, ease: 'power3' }) : null;
+
+      row.addEventListener('mouseenter', () => {
+        if (glow) gsap.to(glow, { opacity: 1, duration: 0.35, ease: 'power2.out' });
+
+        rows.forEach((sibling) => {
+          gsap.to(sibling, {
+            opacity: sibling === row ? 1 : 0.45,
+            duration: 0.4,
+            ease: 'power2.out',
+          });
+        });
+      });
+
+      row.addEventListener('mousemove', (event) => {
+        if (!(event instanceof MouseEvent)) return;
+        const rect = row.getBoundingClientRect();
+
+        if (setGlowX && setGlowY) {
+          setGlowX(event.clientX - rect.left);
+          setGlowY(event.clientY - rect.top);
+        }
+      });
+    });
+
+    sequence?.addEventListener('mouseleave', () => {
+      rows.forEach((row) => {
+        if (!(row instanceof HTMLElement)) return;
+        gsap.to(row, { opacity: 1, duration: 0.45, ease: 'power2.out' });
+
+        const glow = row.querySelector('[data-card-glow]');
+        if (glow) gsap.to(glow, { opacity: 0, duration: 0.3 });
+      });
+    });
+  }
+</script>
+
+<style>
+  .capability {
+    position: relative;
+    padding-block: var(--section-pad);
+  }
+
+  .capability__heading {
+    margin-top: var(--space-2);
+    max-width: 34ch;
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .capability-sequence {
+    position: relative;
+    margin-top: var(--space-5);
+  }
+
+  .capability-sequence__thread {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.5rem;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .capability-row {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-hairline);
+    padding-left: 2.5rem;
+  }
+
+  .capability-row:first-child {
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .capability-row__glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 320px;
+    margin: -160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 83, 53, 0.3), transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    filter: blur(10px);
+  }
+
+  .capability-row__index {
+    position: relative;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-flare);
+    padding-top: 0.2rem;
+  }
+
+  .capability-row__icon {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .capability-row__text {
+    position: relative;
+    max-width: 42rem;
+  }
+
+  .capability-row__title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .capability-row__description {
+    margin-top: 0.6rem;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--color-steel);
+  }
+
+  @media (min-width: 48rem) {
+    .capability-row {
+      align-items: center;
+      gap: var(--space-5);
+    }
+
+    .capability-row__index {
+      font-size: 1.4rem;
+    }
+  }
+</style>

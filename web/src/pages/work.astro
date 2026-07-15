@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Work — Veloce Digital" description="Selected work from Veloce Digital.">
+  <section class="container stub">
+    <p class="eyebrow">Work</p>
+    <h1>Selected work</h1>
+    <p>Case studies are on their way — check back soon.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .stub {
+    padding-block: var(--section-pad);
+    max-width: 40rem;
+  }
+
+  .stub h1 {
+    margin-top: var(--space-2);
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .stub p:last-child {
+    margin-top: var(--space-3);
+    font-size: var(--fs-body-lg);
+    color: var(--color-steel);
+  }
+</style>

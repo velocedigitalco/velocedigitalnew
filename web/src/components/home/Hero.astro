@@ -1,0 +1,218 @@
+---
+import type { CTA } from '../../lib/sanity';
+
+interface Props {
+  heading: string;
+  subheading: string;
+  ctaPrimary: CTA;
+  ctaSecondary: CTA;
+}
+
+const { heading, subheading, ctaPrimary, ctaSecondary } = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero__aura" data-hero-aura aria-hidden="true"></div>
+
+  <svg
+    class="hero__ribbon"
+    data-hero-ribbon-svg
+    viewBox="0 0 600 800"
+    preserveAspectRatio="xMidYMid slice"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="ribbon-gradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" style="stop-color: var(--color-violet)" />
+        <stop offset="55%" style="stop-color: var(--color-flare)" />
+        <stop offset="100%" style="stop-color: var(--color-redline)" />
+      </linearGradient>
+      <filter id="ribbon-glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="14" />
+      </filter>
+    </defs>
+    <path
+      class="hero__ribbon-glow"
+      d="M 470 20 C 360 170, 540 260, 400 420 C 300 540, 500 630, 360 780"
+      fill="none"
+      stroke="url(#ribbon-gradient)"
+      stroke-width="46"
+      stroke-linecap="round"
+      filter="url(#ribbon-glow)"
+    />
+    <path
+      data-hero-ribbon
+      d="M 470 20 C 360 170, 540 260, 400 420 C 300 540, 500 630, 360 780"
+      fill="none"
+      stroke="url(#ribbon-gradient)"
+      stroke-width="7"
+      stroke-linecap="round"
+    />
+  </svg>
+
+  <div class="container hero__inner">
+    <p class="eyebrow">Lahore / PK</p>
+    <h1 class="hero__heading" data-hero-heading>{heading}</h1>
+    <p class="hero__subheading" data-hero-subheading>{subheading}</p>
+    <div class="hero__ctas" data-hero-ctas>
+      <a class="btn btn--primary" href={ctaPrimary.url}>{ctaPrimary.label}</a>
+      <a class="btn btn--secondary" href={ctaSecondary.url}>{ctaSecondary.label}</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(SplitText);
+
+  const headingEl = document.querySelector('[data-hero-heading]');
+  const subheadingEl = document.querySelector('[data-hero-subheading]');
+  const ctasEl = document.querySelector('[data-hero-ctas]');
+  const auraEl = document.querySelector('[data-hero-aura]');
+  const ribbonPath = document.querySelector('[data-hero-ribbon]');
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Sequential staggered reveal: heading words, then subheading
+  // "immediately after", then the CTAs — in order of importance.
+  if (
+    headingEl instanceof HTMLElement &&
+    subheadingEl instanceof HTMLElement &&
+    ctasEl instanceof HTMLElement &&
+    !prefersReducedMotion
+  ) {
+    const split = SplitText.create(headingEl, { type: 'words' });
+
+    gsap
+      .timeline({ defaults: { ease: 'power4.out' } })
+      .from(split.words, {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+      })
+      .from(
+        subheadingEl,
+        { y: 20, opacity: 0, duration: 0.7 },
+        '-=0.45' // starts 0.45s before the previous tween finishes, so it overlaps rather than waiting
+      )
+      .from(
+        Array.from(ctasEl.children),
+        { y: 12, opacity: 0, duration: 0.6, stagger: 0.12 },
+        '-=0.25'
+      );
+  }
+
+  // The ribbon draws itself in on load, like the rest of the hero — not a
+  // static graphic dropped in already-finished. Same dash-offset technique
+  // as the capability sequence's thread, just triggered on load instead of
+  // scroll, since this is the very first thing in the viewport.
+  if (ribbonPath instanceof SVGPathElement) {
+    const length = ribbonPath.getTotalLength();
+
+    if (prefersReducedMotion) {
+      gsap.set(ribbonPath, { strokeDasharray: length, strokeDashoffset: 0 });
+    } else {
+      gsap.set(ribbonPath, { strokeDasharray: length, strokeDashoffset: length });
+      gsap.to(ribbonPath, {
+        strokeDashoffset: 0,
+        duration: 2.2,
+        delay: 0.2,
+        ease: 'power3.inOut',
+      });
+    }
+  }
+
+  // Ambient drift on the background aura — cinematic atmosphere, not decoration.
+  if (auraEl instanceof HTMLElement && !prefersReducedMotion) {
+    gsap.to(auraEl, {
+      x: '+=60',
+      y: '-=40',
+      duration: 9,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-block: var(--section-pad);
+  }
+
+  .hero__aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    width: min(70rem, 140vw);
+    height: min(70rem, 140vw);
+    transform: translate(-50%, -50%);
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255, 83, 53, 0.22), transparent 55%),
+      radial-gradient(circle at 70% 65%, rgba(124, 92, 255, 0.18), transparent 55%);
+    filter: blur(70px);
+    pointer-events: none;
+  }
+
+  /* The ribbon sits to the right of the hero text, bleeding off the top
+     and bottom edges — "slice" so it always fills its box rather than
+     letterboxing on unusual viewport ratios. */
+  .hero__ribbon {
+    position: absolute;
+    top: 0;
+    right: -8%;
+    z-index: 0;
+    width: min(46rem, 75vw);
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .hero__ribbon-glow {
+    opacity: 0.6;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 50rem;
+  }
+
+  .hero__heading {
+    margin-top: var(--space-3);
+    font-size: var(--fs-hero);
+    font-weight: 700;
+    color: var(--color-paper);
+  }
+
+  .hero__subheading {
+    margin-top: var(--space-3);
+    max-width: 36ch;
+    font-size: var(--fs-body-lg);
+    color: var(--color-steel);
+  }
+
+  .hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  @media (max-width: 60rem) {
+    /* On narrower viewports the ribbon would otherwise cut across the
+       text — fade it back so it reads as atmosphere behind the words
+       rather than competing with them. */
+    .hero__ribbon {
+      opacity: 0.35;
+    }
+  }
+</style>

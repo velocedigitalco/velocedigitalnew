@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import Marquee from '../components/home/Marquee.astro';
+import CapabilityShowcase from '../components/home/CapabilityShowcase.astro';
+import ProjectShowcase from '../components/home/ProjectShowcase.astro';
+import { getHomePage, getCaseStudies } from '../lib/sanity';
+
+const [home, caseStudies] = await Promise.all([getHomePage(), getCaseStudies()]);
+---
+
+<BaseLayout
+  title={home.heroHeading}
+  description={home.heroSubheading}
+>
+  <Hero
+    heading={home.heroHeading}
+    subheading={home.heroSubheading}
+    ctaPrimary={home.ctaPrimary}
+    ctaSecondary={home.ctaSecondary}
+  />
+  <Marquee cards={home.capabilityCards} />
+  <CapabilityShowcase cards={home.capabilityCards} />
+  <ProjectShowcase caseStudies={caseStudies} />
+</BaseLayout>
