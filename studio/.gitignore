@@ -1,0 +1,15 @@
+# build
+dist/
+.sanity/
+
+# deps
+node_modules/
+
+# env
+.env
+.env.production
+
+# editor / os
+.DS_Store
+.vscode/
+*.log
