@@ -20,8 +20,9 @@ export const structure: StructureResolver = (S) =>
         .id('siteSettings')
         .child(S.document().schemaType('siteSettings').documentId('siteSettings')),
       S.documentTypeListItem('caseStudy').title('Case Studies'),
+      S.documentTypeListItem('service').title('Services'),
       S.divider(),
       ...S.documentTypeListItems().filter(
-        (item) => !['homePage', 'siteSettings', 'caseStudy'].includes(item.getId() ?? '')
+        (item) => !['homePage', 'siteSettings', 'caseStudy', 'service'].includes(item.getId() ?? '')
       ),
     ])

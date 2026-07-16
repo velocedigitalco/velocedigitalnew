@@ -6,45 +6,205 @@ const settings = await getSiteSettings();
 ---
 
 <BaseLayout title="Contact — Veloce Digital" description="Get in touch with Veloce Digital.">
-  <section class="container stub">
+  <section class="container contact">
     <p class="eyebrow">Contact</p>
-    <h1>Let's build something</h1>
-    <p>A full contact form is on its way — for now, reach us directly:</p>
-    <a class="stub__email" href={`mailto:${settings.email}`}>{settings.email}</a>
-    {settings.phone && <p class="stub__detail">{settings.phone}</p>}
-    <p class="stub__detail">{settings.location}</p>
+    <h1 class="contact__heading">Let's build something</h1>
+    <p class="contact__intro">Tell us a bit about what you need — we'll get back to you.</p>
+
+    <div class="contact__layout">
+      <form class="contact-form" data-contact-form novalidate>
+        <div class="contact-form__row">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required autocomplete="name" />
+        </div>
+
+        <div class="contact-form__row">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email" />
+        </div>
+
+        <div class="contact-form__row">
+          <label for="serviceInterest">What do you need?</label>
+          <select id="serviceInterest" name="serviceInterest">
+            <option value="">Not sure yet</option>
+            <option value="Web Development">Web Development</option>
+            <option value="Security Scans">Security Scans</option>
+            <option value="Domain Management">Domain Management</option>
+            <option value="Something else">Something else</option>
+          </select>
+        </div>
+
+        <div class="contact-form__row">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="5" required></textarea>
+        </div>
+
+        <!-- Honeypot: invisible to real visitors (off-screen, not display:none
+             — some bots specifically skip display:none fields), and marked
+             aria-hidden so screen readers skip it too. -->
+        <div class="contact-form__honeypot" aria-hidden="true">
+          <label for="company">Company</label>
+          <input type="text" id="company" name="company" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <button class="btn btn--primary" type="submit" data-contact-submit>Send Message</button>
+        <p class="contact-form__status" data-contact-status role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="contact__direct">
+        <p class="eyebrow">Or reach us directly</p>
+        <a class="contact__direct-link" href={`mailto:${settings.email}`}>{settings.email}</a>
+        {settings.phone && <p class="contact__direct-detail">{settings.phone}</p>}
+        <p class="contact__direct-detail">{settings.location}</p>
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
+<script>
+  const form = document.querySelector('[data-contact-form]');
+  const status = document.querySelector('[data-contact-status]');
+  const submitBtn = document.querySelector('[data-contact-submit]');
+
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!(status instanceof HTMLElement) || !(submitBtn instanceof HTMLButtonElement)) return;
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      submitBtn.disabled = true;
+      status.textContent = 'Sending…';
+      status.className = 'contact-form__status';
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+          status.textContent = "Thanks — we'll get back to you soon.";
+          status.classList.add('contact-form__status--success');
+          form.reset();
+        } else {
+          status.textContent = data.error || 'Something went wrong. Please try again.';
+          status.classList.add('contact-form__status--error');
+        }
+      } catch {
+        status.textContent = 'Something went wrong. Please try again, or email us directly.';
+        status.classList.add('contact-form__status--error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+</script>
+
 <style>
-  .stub {
+  .contact {
     padding-block: var(--section-pad);
-    max-width: 40rem;
+    max-width: 56rem;
   }
 
-  .stub h1 {
+  .contact__heading {
     margin-top: var(--space-2);
     font-size: var(--fs-h2);
     font-weight: 600;
     color: var(--color-paper);
   }
 
-  .stub p:nth-of-type(2) {
+  .contact__intro {
     margin-top: var(--space-3);
     font-size: var(--fs-body-lg);
     color: var(--color-steel);
+    max-width: 40ch;
   }
 
-  .stub__email {
+  .contact__layout {
+    margin-top: var(--space-5);
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .contact-form__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .contact-form__row label {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--color-steel);
+  }
+
+  .contact-form__row input,
+  .contact-form__row select,
+  .contact-form__row textarea {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--color-paper);
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    padding: 0.65rem 0.8rem;
+  }
+
+  .contact-form__row input:focus,
+  .contact-form__row select:focus,
+  .contact-form__row textarea:focus {
+    outline: 2px solid var(--color-flare);
+    outline-offset: 1px;
+  }
+
+  .contact-form__honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__status {
+    margin-top: var(--space-2);
+    font-size: 0.9rem;
+    min-height: 1.2em;
+  }
+
+  .contact-form__status--success {
+    color: #4ade80;
+  }
+
+  .contact-form__status--error {
+    color: var(--color-redline);
+  }
+
+  .contact__direct {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .contact__direct-link {
     display: inline-block;
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
     font-family: var(--font-mono);
     font-size: 1.1rem;
     color: var(--color-flare);
   }
 
-  .stub__detail {
-    margin-top: 0.5rem;
+  .contact__direct-detail {
+    margin-top: 0.4rem;
     color: var(--color-steel);
+  }
+
+  @media (min-width: 48rem) {
+    .contact__layout {
+      grid-template-columns: 1.3fr 1fr;
+      align-items: start;
+    }
   }
 </style>

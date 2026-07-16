@@ -2,24 +2,29 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/home/Hero.astro';
 import Marquee from '../components/home/Marquee.astro';
+import ServicesSection from '../components/home/ServicesSection.astro';
 import CapabilityShowcase from '../components/home/CapabilityShowcase.astro';
 import ProjectShowcase from '../components/home/ProjectShowcase.astro';
-import { getHomePage, getCaseStudies } from '../lib/sanity';
+import ClosingCta from '../components/home/ClosingCta.astro';
+import { getHomePage, getCaseStudies, getServices } from '../lib/sanity';
 
-const [home, caseStudies] = await Promise.all([getHomePage(), getCaseStudies()]);
+const [home, caseStudies, services] = await Promise.all([
+  getHomePage(),
+  getCaseStudies(),
+  getServices(),
+]);
 ---
 
-<BaseLayout
-  title={home.heroHeading}
-  description={home.heroSubheading}
->
+<BaseLayout title={home.heroHeadings[0] ?? 'Veloce Digital'} description={home.heroSubheading}>
   <Hero
-    heading={home.heroHeading}
+    headings={home.heroHeadings}
     subheading={home.heroSubheading}
     ctaPrimary={home.ctaPrimary}
     ctaSecondary={home.ctaSecondary}
   />
-  <Marquee cards={home.capabilityCards} />
+  <Marquee services={services} />
+  <ServicesSection services={services} />
   <CapabilityShowcase cards={home.capabilityCards} />
   <ProjectShowcase caseStudies={caseStudies} />
+  <ClosingCta />
 </BaseLayout>

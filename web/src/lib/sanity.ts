@@ -22,11 +22,19 @@ export interface CapabilityCard {
 }
 
 export interface HomePageData {
-  heroHeading: string;
+  heroHeadings: string[];
   heroSubheading: string;
   ctaPrimary: CTA;
   ctaSecondary: CTA;
   capabilityCards: CapabilityCard[];
+}
+
+export interface Service {
+  title: string;
+  category: 'development' | 'security' | 'infrastructure' | 'cloud';
+  description: string;
+  icon: string;
+  comingSoon: boolean;
 }
 
 export interface NavLink {
@@ -73,7 +81,7 @@ export interface CaseStudy {
 const API_VERSION = '2024-06-01';
 
 const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
-  heroHeading,
+  "heroHeadings": coalesce(heroHeadings, []),
   heroSubheading,
   ctaPrimary,
   ctaSecondary,
@@ -82,6 +90,18 @@ const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
     description,
     icon
   }, [])
+}`;
+
+// Ordered within each category by the optional "order" field, falling back
+// to creation date. Category grouping happens client-side in
+// ServicesSection.astro, not here — GROQ can sort but a full group-by is
+// more naturally expressed once in JS than duplicated across queries.
+const SERVICES_QUERY = `*[_type == "service"] | order(coalesce(order, 999) asc, _createdAt asc){
+  title,
+  category,
+  description,
+  icon,
+  "comingSoon": coalesce(comingSoon, false)
 }`;
 
 // asset-> dereferences the image asset document so we get its CDN url and
@@ -204,5 +224,14 @@ export async function getSiteSettings(): Promise<SiteSettings> {
  */
 export async function getCaseStudies(): Promise<CaseStudy[]> {
   const result = await groq<CaseStudy[]>(CASE_STUDIES_QUERY);
+  return result ?? [];
+}
+
+/**
+ * Fetches all published services. Same empty-is-valid handling as
+ * getCaseStudies.
+ */
+export async function getServices(): Promise<Service[]> {
+  const result = await groq<Service[]>(SERVICES_QUERY);
   return result ?? [];
 }

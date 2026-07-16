@@ -1,12 +1,12 @@
 ---
-import type { CapabilityCard } from '../../lib/sanity';
+import type { Service } from '../../lib/sanity';
 
 interface Props {
-  cards: CapabilityCard[];
+  services: Service[];
 }
 
-const { cards } = Astro.props;
-const items = cards.map((card) => card.title.toUpperCase());
+const { services } = Astro.props;
+const items = services.map((service) => service.title.toUpperCase());
 ---
 
 <div class="marquee" aria-hidden="true">

@@ -2,13 +2,17 @@
 import type { CTA } from '../../lib/sanity';
 
 interface Props {
-  heading: string;
+  headings: string[];
   subheading: string;
   ctaPrimary: CTA;
   ctaSecondary: CTA;
 }
 
-const { heading, subheading, ctaPrimary, ctaSecondary } = Astro.props;
+const { headings, subheading, ctaPrimary, ctaSecondary } = Astro.props;
+// The static HTML (what search engines and no-JS visitors see) always
+// shows the first heading — rotation is a progressive enhancement on top
+// of a real, crawlable H1, not a replacement for one.
+const firstHeading = headings[0] ?? '';
 ---
 
 <section class="hero">
@@ -52,7 +56,9 @@ const { heading, subheading, ctaPrimary, ctaSecondary } = Astro.props;
 
   <div class="container hero__inner">
     <p class="eyebrow">Lahore / PK</p>
-    <h1 class="hero__heading" data-hero-heading>{heading}</h1>
+    <h1 class="hero__heading" data-hero-heading data-headings={JSON.stringify(headings)}>
+      {firstHeading}
+    </h1>
     <p class="hero__subheading" data-hero-subheading>{subheading}</p>
     <div class="hero__ctas" data-hero-ctas>
       <a class="btn btn--primary" href={ctaPrimary.url}>{ctaPrimary.label}</a>
@@ -72,6 +78,9 @@ const { heading, subheading, ctaPrimary, ctaSecondary } = Astro.props;
   const ctasEl = document.querySelector('[data-hero-ctas]');
   const auraEl = document.querySelector('[data-hero-aura]');
   const ribbonPath = document.querySelector('[data-hero-ribbon]');
+
+  const headings: string[] =
+    headingEl instanceof HTMLElement ? JSON.parse(headingEl.dataset.headings ?? '[]') : [];
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -103,6 +112,43 @@ const { heading, subheading, ctaPrimary, ctaSecondary } = Astro.props;
         { y: 12, opacity: 0, duration: 0.6, stagger: 0.12 },
         '-=0.25'
       );
+  }
+
+  // Rotation: after the initial reveal settles, cycle through the rest of
+  // the headings (if there are any) with a quick out/in word-swap, on a
+  // loop. Skipped entirely under reduced motion or if there's only one
+  // heading — a static hero is a completely valid, unbroken result of
+  // either condition, not a degraded one.
+  if (headingEl instanceof HTMLElement && !prefersReducedMotion && headings.length > 1) {
+    const heading = headingEl;
+    let index = 0;
+
+    function rotate() {
+      const next = (index + 1) % headings.length;
+      const outgoing = SplitText.create(heading, { type: 'words' });
+
+      gsap.to(outgoing.words, {
+        y: -18,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.03,
+        ease: 'power2.in',
+        onComplete: () => {
+          heading.textContent = headings[next];
+          const incoming = SplitText.create(heading, { type: 'words' });
+          gsap.from(incoming.words, {
+            y: 18,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.03,
+            ease: 'power2.out',
+          });
+          index = next;
+        },
+      });
+    }
+
+    setInterval(rotate, 5000);
   }
 
   // The ribbon draws itself in on load, like the rest of the hero — not a

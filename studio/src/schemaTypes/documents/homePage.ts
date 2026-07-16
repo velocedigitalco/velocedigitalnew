@@ -6,11 +6,17 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'heroHeading',
-      title: 'Hero Heading',
-      type: 'string',
-      initialValue: 'Built fast. Engineered to grow.',
-      validation: (Rule) => Rule.required(),
+      name: 'heroHeadings',
+      title: 'Hero Headings',
+      type: 'array',
+      of: [{type: 'string'}],
+      description: 'Rotates on the homepage — add one per line of business, or just to keep the hero fresh.',
+      initialValue: [
+        'Built fast. Engineered to grow.',
+        'Websites that ship. Security that holds.',
+        'From domains to deployment — handled.',
+      ],
+      validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
       name: 'heroSubheading',

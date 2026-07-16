@@ -1,0 +1,186 @@
+---
+import ServiceIcon from '../icons/ServiceIcon.astro';
+import type { Service } from '../../lib/sanity';
+
+interface Props {
+  services: Service[];
+}
+
+const { services } = Astro.props;
+
+const CATEGORY_LABELS: Record<Service['category'], string> = {
+  development: 'Development',
+  security: 'Security',
+  infrastructure: 'Infrastructure',
+  cloud: 'Cloud',
+};
+
+// Grouped client-side (well, build-side) rather than duplicating a group-by
+// in GROQ — the category order here is deliberate (roughly "what we do
+// today" first, "what's coming" last), not alphabetical.
+const CATEGORY_ORDER: Service['category'][] = ['development', 'security', 'infrastructure', 'cloud'];
+
+const grouped = CATEGORY_ORDER.map((category) => ({
+  category,
+  label: CATEGORY_LABELS[category],
+  services: services.filter((service) => service.category === category),
+})).filter((group) => group.services.length > 0);
+---
+
+{
+  grouped.length > 0 && (
+    <section class="services">
+      <div class="container">
+        <p class="eyebrow">What We Offer</p>
+        <h2 class="services__heading" data-services-heading>
+          Services built around how modern businesses actually run
+        </h2>
+      </div>
+
+      <div class="container services__groups">
+        {grouped.map((group) => (
+          <div class="services__group">
+            <h3 class="services__category">{group.label}</h3>
+            <div class="services__grid">
+              {group.services.map((service) => (
+                <article class="service-card" data-service-card>
+                  <div class="service-card__icon">
+                    <ServiceIcon name={service.icon} />
+                  </div>
+                  <h4 class="service-card__title">
+                    {service.title}
+                    {service.comingSoon && <span class="service-card__badge">Coming Soon</span>}
+                  </h4>
+                  <p class="service-card__description">{service.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { SplitText } from 'gsap/SplitText';
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const headingEl = document.querySelector('[data-services-heading]');
+  const cards = Array.from(document.querySelectorAll('[data-service-card]'));
+
+  if (headingEl instanceof HTMLElement && !prefersReducedMotion) {
+    const split = SplitText.create(headingEl, { type: 'words' });
+
+    gsap.timeline({
+      defaults: { ease: 'power4.out' },
+      scrollTrigger: { trigger: headingEl, start: 'top 85%', once: true },
+    }).from(split.words, { y: 26, opacity: 0, duration: 0.7, stagger: 0.06 });
+  }
+
+  if (cards.length && !prefersReducedMotion) {
+    gsap.from(cards, {
+      y: 30,
+      opacity: 0,
+      duration: 0.7,
+      stagger: 0.08,
+      ease: 'power3.out',
+      scrollTrigger: { trigger: '.services__groups', start: 'top 80%', once: true },
+    });
+  }
+</script>
+
+<style>
+  .services {
+    padding-block: var(--section-pad);
+  }
+
+  .services__heading {
+    margin-top: var(--space-2);
+    max-width: 40ch;
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .services__groups {
+    margin-top: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .services__category {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-flare);
+  }
+
+  .services__grid {
+    margin-top: var(--space-3);
+    display: grid;
+    gap: 1px;
+    background: var(--color-hairline);
+    border: 1px solid var(--color-hairline);
+    grid-template-columns: 1fr;
+  }
+
+  .service-card {
+    padding: var(--space-4);
+    background: var(--color-ink);
+  }
+
+  .service-card__icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-redline);
+  }
+
+  .service-card__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: var(--space-3);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .service-card__badge {
+    padding: 0.15rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-steel);
+    border: 1px solid var(--color-hairline);
+  }
+
+  .service-card__description {
+    margin-top: 0.6rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--color-steel);
+  }
+
+  @media (min-width: 40rem) {
+    .services__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .services__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
