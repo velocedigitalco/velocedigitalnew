@@ -1,0 +1,105 @@
+---
+interface Props {
+  image: {
+    url: string;
+    width: number;
+    height: number;
+    alt: string;
+  } | null;
+}
+
+const { image } = Astro.props;
+---
+
+{
+  image && (
+    <section class="process-reveal">
+      <div class="process-reveal__frame" data-reveal-frame>
+        <img
+          class="process-reveal__image"
+          src={image.url}
+          width={image.width}
+          height={image.height}
+          alt={image.alt}
+          data-reveal-image
+        />
+      </div>
+    </section>
+  )
+}
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const frame = document.querySelector('[data-reveal-frame]');
+  const image = document.querySelector('[data-reveal-image]');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (frame instanceof HTMLElement && image instanceof HTMLElement && !prefersReducedMotion) {
+    // Entrance: the frame tilts up out of a slight 3D perspective and the
+    // image scales down from a zoomed-in crop as it reaches the viewport --
+    // a real, if modest, first step toward the pinned/dimensional feel
+    // referenced, without a full custom 3D scene.
+    gsap.set(frame, { transformPerspective: 1000 });
+
+    gsap.fromTo(
+      frame,
+      { rotateX: 10, opacity: 0 },
+      {
+        rotateX: 0,
+        opacity: 1,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: frame, start: 'top 80%', once: true },
+      }
+    );
+
+    gsap.fromTo(
+      image,
+      { scale: 1.2 },
+      {
+        scale: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: frame, start: 'top 80%', end: 'top 20%', scrub: 0.6 },
+      }
+    );
+
+    // Ongoing parallax while the section is in view: the image drifts
+    // slower than the page scrolls, the classic depth cue.
+    gsap.to(image, {
+      yPercent: 8,
+      ease: 'none',
+      scrollTrigger: { trigger: frame, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
+    });
+  }
+</script>
+
+<style>
+  .process-reveal {
+    padding-top: var(--section-pad);
+  }
+
+  .process-reveal__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--color-hairline);
+  }
+
+  .process-reveal__image {
+    position: absolute;
+    inset: -5%;
+    width: 110%;
+    height: 110%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 48rem) {
+    .process-reveal__frame {
+      aspect-ratio: 21 / 9;
+    }
+  }
+</style>

@@ -42,6 +42,21 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'processImage',
+      title: 'Process Showcase Image',
+      type: 'image',
+      description:
+        'Large image for the scroll-reveal moment between Services and Four Disciplines. Optional — that section is skipped entirely if empty. Source it yourself (e.g. Pixabay, properly licensed) and upload here; the site never hotlinks external image URLs.',
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+    defineField({
       name: 'capabilityCards',
       title: 'Capability Cards',
       type: 'array',

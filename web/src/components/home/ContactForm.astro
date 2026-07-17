@@ -1,0 +1,153 @@
+---
+interface Props {
+  heading?: string;
+}
+
+const { heading = "Let's build something" } = Astro.props;
+---
+
+<form class="contact-form" data-contact-form novalidate>
+  {heading && <h2 class="contact-form__heading">{heading}</h2>}
+
+  <div class="contact-form__row">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required autocomplete="name" />
+  </div>
+
+  <div class="contact-form__row">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required autocomplete="email" />
+  </div>
+
+  <div class="contact-form__row">
+    <label for="reason">Reason for reaching out</label>
+    <input type="text" id="reason" name="reason" placeholder="e.g. New website, security scan..." />
+  </div>
+
+  <div class="contact-form__row">
+    <label for="message">Message</label>
+    <textarea id="message" name="message" rows="5" required></textarea>
+  </div>
+
+  <!-- Honeypot: invisible to real visitors (off-screen, not display:none —
+       some bots specifically skip display:none fields), and marked
+       aria-hidden so screen readers skip it too. -->
+  <div class="contact-form__honeypot" aria-hidden="true">
+    <label for="company">Company</label>
+    <input type="text" id="company" name="company" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <button class="btn btn--primary" type="submit" data-contact-submit>Send Message</button>
+  <p class="contact-form__status" data-contact-status role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  // Delegated to document so this works no matter how many ContactForm
+  // instances are on the page (homepage + /contact both render one).
+  document.querySelectorAll('[data-contact-form]').forEach((form) => {
+    if (!(form instanceof HTMLFormElement)) return;
+
+    const status = form.querySelector('[data-contact-status]');
+    const submitBtn = form.querySelector('[data-contact-submit]');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!(status instanceof HTMLElement) || !(submitBtn instanceof HTMLButtonElement)) return;
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+
+      submitBtn.disabled = true;
+      status.textContent = 'Sending…';
+      status.className = 'contact-form__status';
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+          status.textContent = "Thanks — we'll get back to you soon.";
+          status.classList.add('contact-form__status--success');
+          form.reset();
+        } else {
+          status.textContent = data.error || 'Something went wrong. Please try again.';
+          status.classList.add('contact-form__status--error');
+        }
+      } catch {
+        status.textContent = 'Something went wrong. Please try again, or email us directly.';
+        status.classList.add('contact-form__status--error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .contact-form__heading {
+    margin-bottom: var(--space-4);
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    color: var(--color-paper);
+  }
+
+  .contact-form__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .contact-form__row label {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--color-steel);
+  }
+
+  .contact-form__row input,
+  .contact-form__row textarea {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--color-paper);
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    padding: 0.65rem 0.8rem;
+  }
+
+  .contact-form__row input::placeholder,
+  .contact-form__row textarea::placeholder {
+    color: var(--color-steel-dim);
+  }
+
+  .contact-form__row input:focus,
+  .contact-form__row textarea:focus {
+    outline: 2px solid var(--color-flare);
+    outline-offset: 1px;
+  }
+
+  .contact-form__honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__status {
+    margin-top: var(--space-2);
+    font-size: 0.9rem;
+    min-height: 1.2em;
+  }
+
+  .contact-form__status--success {
+    color: #1a8f4c;
+  }
+
+  .contact-form__status--error {
+    color: var(--color-redline);
+  }
+</style>

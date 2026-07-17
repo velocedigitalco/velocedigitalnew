@@ -26,6 +26,12 @@ export interface HomePageData {
   heroSubheading: string;
   ctaPrimary: CTA;
   ctaSecondary: CTA;
+  processImage: {
+    url: string;
+    width: number;
+    height: number;
+    alt: string;
+  } | null;
   capabilityCards: CapabilityCard[];
 }
 
@@ -85,6 +91,15 @@ const HOME_PAGE_QUERY = `*[_type == "homePage"][0]{
   heroSubheading,
   ctaPrimary,
   ctaSecondary,
+  "processImage": select(
+    defined(processImage.asset) => {
+      "url": processImage.asset->url,
+      "width": processImage.asset->metadata.dimensions.width,
+      "height": processImage.asset->metadata.dimensions.height,
+      "alt": processImage.alt
+    },
+    null
+  ),
   "capabilityCards": coalesce(capabilityCards[]{
     title,
     description,

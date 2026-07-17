@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "compatibility_date": "2026-07-01",
+  "d1_databases": [
+    {
+      "binding": "INQUIRIES_DB",
+      "database_name": "veloce-inquiries",
+      "database_id": "ab82af9d-628a-40d1-9fe9-684954a96e80"
+    }
+  ]
+}

@@ -54,18 +54,18 @@ button {
 /* ---------- Design tokens ---------- */
 :root {
   /* Color */
-  --color-ink: #07080b;
-  --color-ink-deep: #030304;
-  --color-panel: #12141a;
-  --color-hairline: rgba(245, 246, 244, 0.09);
-  --color-paper: #f5f6f4;
-  --color-steel: #9aa1b0;
-  --color-steel-dim: #656c7a;
-  --color-redline: #ff5335;
-  --color-redline-dim: #d63f24;
-  --color-violet: #7c5cff;
-  --color-flare: #ff2e88;
-  --color-flare-dim: #d4136a;
+  --color-ink: #f7f6f2;
+  --color-ink-deep: #ffffff;
+  --color-panel: #ffffff;
+  --color-hairline: rgba(10, 11, 15, 0.12);
+  --color-paper: #14151a;
+  --color-steel: #565d6b;
+  --color-steel-dim: #8b92a0;
+  --color-redline: #e8431f;
+  --color-redline-dim: #b8330f;
+  --color-violet: #6a45f0;
+  --color-flare: #e0177a;
+  --color-flare-dim: #b30f61;
 
   /* Type */
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
@@ -100,7 +100,7 @@ button {
 /* ---------- Base ---------- */
 html {
   background: var(--color-ink);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -227,12 +227,12 @@ h3 {
 }
 
 .btn--secondary {
-  background: rgba(245, 246, 244, 0.04);
+  background: rgba(10, 11, 15, 0.035);
   border-color: var(--color-hairline);
   color: var(--color-paper);
 }
 
 .btn--secondary:hover {
-  border-color: rgba(245, 246, 244, 0.3);
-  background: rgba(245, 246, 244, 0.07);
+  border-color: rgba(10, 11, 15, 0.25);
+  background: rgba(10, 11, 15, 0.06);
 }

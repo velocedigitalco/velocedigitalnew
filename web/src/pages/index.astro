@@ -3,7 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/home/Hero.astro';
 import Marquee from '../components/home/Marquee.astro';
 import ServicesSection from '../components/home/ServicesSection.astro';
+import ProcessReveal from '../components/home/ProcessReveal.astro';
 import CapabilityShowcase from '../components/home/CapabilityShowcase.astro';
+import TechStack from '../components/home/TechStack.astro';
 import ProjectShowcase from '../components/home/ProjectShowcase.astro';
 import ClosingCta from '../components/home/ClosingCta.astro';
 import { getHomePage, getCaseStudies, getServices } from '../lib/sanity';
@@ -24,7 +26,9 @@ const [home, caseStudies, services] = await Promise.all([
   />
   <Marquee services={services} />
   <ServicesSection services={services} />
+  <ProcessReveal image={home.processImage} />
   <CapabilityShowcase cards={home.capabilityCards} />
+  <TechStack />
   <ProjectShowcase caseStudies={caseStudies} />
   <ClosingCta />
 </BaseLayout>

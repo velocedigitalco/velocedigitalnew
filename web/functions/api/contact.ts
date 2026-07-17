@@ -1,29 +1,23 @@
 /**
  * POST /api/contact
  *
- * Handles the contact form. This runs server-side on Cloudflare's Workers
- * runtime (not in the browser), which is the whole point: it's the only
- * place that ever sees SANITY_WRITE_TOKEN. That token can create documents
- * in this project, so it must never reach client-side JS or the page
- * source — if it did, anyone could use it to write arbitrary data.
- *
- * Writes to the "inquiries" dataset specifically, not "production". That
- * dataset is private (unlike production, which is public so the site's
- * own content can be read at build time) — see studio's dataset list for
- * why: this holds visitor PII and shouldn't be queryable by anyone who
- * finds the project ID, which production's content readably is.
+ * Handles the contact form, writing submissions to a D1 database (see
+ * wrangler.jsonc for the binding) rather than Sanity. Two reasons for D1
+ * specifically: the Sanity project is on a free trial, so nothing meant to
+ * persist long-term should live there; and D1 is bound directly via the
+ * INQUIRIES_DB binding below, so there's no separate write-token secret to
+ * configure or leak -- the binding itself is the access control.
  */
 
 interface Env {
-  SANITY_PROJECT_ID: string;
-  SANITY_WRITE_TOKEN: string;
+  INQUIRIES_DB: D1Database;
 }
 
 interface ContactPayload {
   name?: string;
   email?: string;
+  reason?: string;
   message?: string;
-  serviceInterest?: string;
   company?: string; // honeypot — a field real visitors never see or fill
 }
 
@@ -54,8 +48,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
   const name = (payload.name ?? '').trim();
   const email = (payload.email ?? '').trim();
+  const reason = (payload.reason ?? '').trim();
   const message = (payload.message ?? '').trim();
-  const serviceInterest = (payload.serviceInterest ?? '').trim();
 
   if (!name || !email || !message) {
     return jsonResponse({ error: 'Name, email, and message are all required.' }, 400);
@@ -65,42 +59,25 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return jsonResponse({ error: "That email address doesn't look right." }, 400);
   }
 
-  if (!env.SANITY_PROJECT_ID || !env.SANITY_WRITE_TOKEN) {
-    // Loud in Cloudflare's function logs, generic to the visitor — no
-    // internal configuration details leak into the response body.
-    console.error('Contact form: SANITY_PROJECT_ID or SANITY_WRITE_TOKEN is not set.');
+  if (!env.INQUIRIES_DB) {
+    // Loud in Cloudflare's function logs, generic to the visitor. If this
+    // fires, the D1 binding either isn't deployed yet or the binding name
+    // doesn't match wrangler.jsonc's "INQUIRIES_DB".
+    console.error('Contact form: INQUIRIES_DB binding is not available.');
     return jsonResponse(
       { error: 'Something went wrong on our end. Please email us directly instead.' },
       500
     );
   }
 
-  const endpoint = `https://${env.SANITY_PROJECT_ID}.api.sanity.io/v2024-06-01/data/mutate/inquiries`;
-
-  const sanityResponse = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${env.SANITY_WRITE_TOKEN}`,
-    },
-    body: JSON.stringify({
-      mutations: [
-        {
-          create: {
-            _type: 'inquiry',
-            name,
-            email,
-            message,
-            serviceInterest: serviceInterest || undefined,
-            submittedAt: new Date().toISOString(),
-          },
-        },
-      ],
-    }),
-  });
-
-  if (!sanityResponse.ok) {
-    console.error('Contact form: Sanity mutate failed', await sanityResponse.text());
+  try {
+    await env.INQUIRIES_DB.prepare(
+      'INSERT INTO inquiries (name, email, reason, message) VALUES (?, ?, ?, ?)'
+    )
+      .bind(name, email, reason || null, message)
+      .run();
+  } catch (error) {
+    console.error('Contact form: D1 insert failed', error);
     return jsonResponse(
       { error: 'Something went wrong on our end. Please email us directly instead.' },
       500

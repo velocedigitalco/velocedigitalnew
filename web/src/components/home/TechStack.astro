@@ -1,0 +1,45 @@
+---
+const STACK = ['Astro', 'TypeScript', 'GSAP', 'Sanity', 'Cloudflare'];
+---
+
+<section class="tech-stack">
+  <div class="container tech-stack__inner">
+    <p class="tech-stack__label">Built with</p>
+    <ul class="tech-stack__list">
+      {STACK.map((tech) => <li>{tech}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tech-stack {
+    padding-top: var(--space-5);
+  }
+
+  .tech-stack__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .tech-stack__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-steel-dim);
+  }
+
+  .tech-stack__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .tech-stack__list li {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-steel);
+  }
+</style>

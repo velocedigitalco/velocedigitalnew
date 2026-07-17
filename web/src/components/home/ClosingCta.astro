@@ -1,11 +1,21 @@
 ---
+import ContactForm from './ContactForm.astro';
 ---
 
 <section class="closing-cta">
   <div class="container closing-cta__inner" data-closing-cta>
-    <h2 class="closing-cta__heading">Have a project in mind?</h2>
-    <p class="closing-cta__sub">Let's build it properly.</p>
-    <a class="btn btn--primary" href="/contact">Start a Project →</a>
+    <div class="closing-cta__intro">
+      <p class="eyebrow">Contact</p>
+      <h2 class="closing-cta__heading">Have a project in mind?</h2>
+      <p class="closing-cta__sub">
+        Let's build it properly. Tell us a bit about what you need below, or reach us directly —
+        details are in the footer.
+      </p>
+    </div>
+
+    <div class="closing-cta__form">
+      <ContactForm heading="" />
+    </div>
   </div>
 </section>
 
@@ -23,7 +33,7 @@
       y: 24,
       opacity: 0,
       duration: 0.7,
-      stagger: 0.1,
+      stagger: 0.12,
       ease: 'power3.out',
       scrollTrigger: { trigger: el, start: 'top 85%', once: true },
     });
@@ -32,28 +42,34 @@
 
 <style>
   .closing-cta {
-    padding-block: var(--section-pad);
+    padding-top: var(--section-pad);
   }
 
   .closing-cta__inner {
-    text-align: center;
-    max-width: 32rem;
+    display: grid;
+    gap: var(--space-5);
+    max-width: 56rem;
     margin-inline: auto;
   }
 
   .closing-cta__heading {
+    margin-top: var(--space-2);
     font-size: var(--fs-h2);
     font-weight: 600;
     color: var(--color-paper);
   }
 
   .closing-cta__sub {
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
     font-size: var(--fs-body-lg);
     color: var(--color-steel);
+    max-width: 34ch;
   }
 
-  .closing-cta__inner .btn {
-    margin-top: var(--space-4);
+  @media (min-width: 48rem) {
+    .closing-cta__inner {
+      grid-template-columns: 1fr 1.1fr;
+      align-items: start;
+    }
   }
 </style>
