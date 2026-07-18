@@ -9,60 +9,112 @@ interface Props {
 }
 
 const { headings, subheading, ctaPrimary, ctaSecondary } = Astro.props;
-// The static HTML (what search engines and no-JS visitors see) always
-// shows the first heading — rotation is a progressive enhancement on top
-// of a real, crawlable H1, not a replacement for one.
 const firstHeading = headings[0] ?? '';
 ---
 
 <section class="hero">
-  <div class="hero__aura" data-hero-aura aria-hidden="true"></div>
+  <!-- Multi-layer atmospheric aura matching the purple/orange screenshot -->
+  <div class="hero__aura" data-hero-aura aria-hidden="true">
+    <div class="hero__aura-violet"></div>
+    <div class="hero__aura-red"></div>
+    <div class="hero__aura-grid"></div>
+  </div>
 
+  <!-- Animated flow ribbon (SVG, right side) -->
   <svg
     class="hero__ribbon"
     data-hero-ribbon-svg
-    viewBox="0 0 600 800"
+    viewBox="0 0 700 900"
     preserveAspectRatio="xMidYMid slice"
     aria-hidden="true"
   >
     <defs>
-      <linearGradient id="ribbon-gradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" style="stop-color: var(--color-violet)" />
-        <stop offset="55%" style="stop-color: var(--color-flare)" />
-        <stop offset="100%" style="stop-color: var(--color-redline)" />
+      <linearGradient id="ribbon-gradient-1" x1="0" y1="0" x2="0.5" y2="1">
+        <stop offset="0%" style="stop-color: #7c5cf5" />
+        <stop offset="45%" style="stop-color: #d4237a" />
+        <stop offset="100%" style="stop-color: #e8431f" />
       </linearGradient>
-      <filter id="ribbon-glow" x="-60%" y="-60%" width="220%" height="220%">
-        <feGaussianBlur stdDeviation="14" />
+      <linearGradient id="ribbon-gradient-2" x1="0.2" y1="0" x2="0.8" y2="1">
+        <stop offset="0%" style="stop-color: #5e3fd8; stop-opacity: 0.5" />
+        <stop offset="60%" style="stop-color: #e8431f; stop-opacity: 0.6" />
+        <stop offset="100%" style="stop-color: #ff6b35; stop-opacity: 0.3" />
+      </linearGradient>
+      <filter id="ribbon-glow-1" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="20" />
+      </filter>
+      <filter id="ribbon-glow-2" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="10" />
       </filter>
     </defs>
+
+    <!-- Thick glow ribbon (background layer) -->
     <path
-      class="hero__ribbon-glow"
-      d="M 470 20 C 360 170, 540 260, 400 420 C 300 540, 500 630, 360 780"
+      class="hero__ribbon-bg"
+      d="M 580 -20 C 450 120, 620 240, 480 420 C 360 570, 560 660, 420 860"
       fill="none"
-      stroke="url(#ribbon-gradient)"
-      stroke-width="46"
+      stroke="url(#ribbon-gradient-1)"
+      stroke-width="80"
       stroke-linecap="round"
-      filter="url(#ribbon-glow)"
+      filter="url(#ribbon-glow-1)"
     />
+    <!-- Medium glow ribbon (mid layer) -->
+    <path
+      d="M 560 -20 C 430 130, 600 250, 460 430 C 340 580, 550 670, 410 870"
+      fill="none"
+      stroke="url(#ribbon-gradient-2)"
+      stroke-width="40"
+      stroke-linecap="round"
+      filter="url(#ribbon-glow-2)"
+      opacity="0.7"
+    />
+    <!-- Sharp fine ribbon (draw-in on load) -->
     <path
       data-hero-ribbon
-      d="M 470 20 C 360 170, 540 260, 400 420 C 300 540, 500 630, 360 780"
+      d="M 570 -20 C 440 125, 610 245, 470 425 C 350 575, 555 665, 415 865"
       fill="none"
-      stroke="url(#ribbon-gradient)"
-      stroke-width="7"
+      stroke="url(#ribbon-gradient-1)"
+      stroke-width="4"
       stroke-linecap="round"
+    />
+    <!-- Second offset ribbon -->
+    <path
+      data-hero-ribbon-2
+      d="M 530 -20 C 400 140, 580 260, 440 440 C 310 590, 520 680, 380 880"
+      fill="none"
+      stroke="url(#ribbon-gradient-2)"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      opacity="0.8"
     />
   </svg>
 
   <div class="container hero__inner">
-    <p class="eyebrow">Lahore / PK</p>
+    <p class="eyebrow" data-hero-eyebrow>Lahore / PK — Global delivery</p>
     <h1 class="hero__heading" data-hero-heading data-headings={JSON.stringify(headings)}>
       {firstHeading}
     </h1>
     <p class="hero__subheading" data-hero-subheading>{subheading}</p>
     <div class="hero__ctas" data-hero-ctas>
-      <a class="btn btn--primary" href={ctaPrimary.url}>{ctaPrimary.label}</a>
+      <a class="btn btn--primary" href={ctaPrimary.url}>{ctaPrimary.label} →</a>
       <a class="btn btn--secondary" href={ctaSecondary.url}>{ctaSecondary.label}</a>
+    </div>
+
+    <!-- Stat strip -->
+    <div class="hero__stats" data-hero-stats>
+      <div class="hero__stat">
+        <span class="hero__stat-value">50+</span>
+        <span class="hero__stat-label">Projects shipped</span>
+      </div>
+      <div class="hero__stat-divider" aria-hidden="true"></div>
+      <div class="hero__stat">
+        <span class="hero__stat-value">100ms</span>
+        <span class="hero__stat-label">Median page load</span>
+      </div>
+      <div class="hero__stat-divider" aria-hidden="true"></div>
+      <div class="hero__stat">
+        <span class="hero__stat-value">Edge</span>
+        <span class="hero__stat-label">Global deployment</span>
+      </div>
     </div>
   </div>
 </section>
@@ -76,16 +128,18 @@ const firstHeading = headings[0] ?? '';
   const headingEl = document.querySelector('[data-hero-heading]');
   const subheadingEl = document.querySelector('[data-hero-subheading]');
   const ctasEl = document.querySelector('[data-hero-ctas]');
-  const auraEl = document.querySelector('[data-hero-aura]');
+  const statsEl = document.querySelector('[data-hero-stats]');
+  const eyebrowEl = document.querySelector('[data-hero-eyebrow]');
+  const auraViolet = document.querySelector('.hero__aura-violet');
+  const auraRed = document.querySelector('.hero__aura-red');
   const ribbonPath = document.querySelector('[data-hero-ribbon]');
+  const ribbonPath2 = document.querySelector('[data-hero-ribbon-2]');
 
   const headings: string[] =
     headingEl instanceof HTMLElement ? JSON.parse(headingEl.dataset.headings ?? '[]') : [];
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Sequential staggered reveal: heading words, then subheading
-  // "immediately after", then the CTAs — in order of importance.
   if (
     headingEl instanceof HTMLElement &&
     subheadingEl instanceof HTMLElement &&
@@ -96,29 +150,19 @@ const firstHeading = headings[0] ?? '';
 
     gsap
       .timeline({ defaults: { ease: 'power4.out' } })
-      .from(split.words, {
-        y: 30,
+      .from(eyebrowEl, { y: 16, opacity: 0, duration: 0.6 })
+      .from(split.words, { y: 40, opacity: 0, duration: 0.85, stagger: 0.09 }, '-=0.3')
+      .from(subheadingEl, { y: 22, opacity: 0, duration: 0.7 }, '-=0.5')
+      .from(Array.from(ctasEl.children), { y: 14, opacity: 0, duration: 0.6, stagger: 0.12 }, '-=0.35')
+      .from(statsEl instanceof HTMLElement ? Array.from(statsEl.children) : [], {
+        y: 10,
         opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-      })
-      .from(
-        subheadingEl,
-        { y: 20, opacity: 0, duration: 0.7 },
-        '-=0.45' // starts 0.45s before the previous tween finishes, so it overlaps rather than waiting
-      )
-      .from(
-        Array.from(ctasEl.children),
-        { y: 12, opacity: 0, duration: 0.6, stagger: 0.12 },
-        '-=0.25'
-      );
+        duration: 0.5,
+        stagger: 0.08,
+      }, '-=0.3');
   }
 
-  // Rotation: after the initial reveal settles, cycle through the rest of
-  // the headings (if there are any) with a quick out/in word-swap, on a
-  // loop. Skipped entirely under reduced motion or if there's only one
-  // heading — a static hero is a completely valid, unbroken result of
-  // either condition, not a degraded one.
+  // Heading rotation
   if (headingEl instanceof HTMLElement && !prefersReducedMotion && headings.length > 1) {
     const heading = headingEl;
     let index = 0;
@@ -128,7 +172,7 @@ const firstHeading = headings[0] ?? '';
       const outgoing = SplitText.create(heading, { type: 'words' });
 
       gsap.to(outgoing.words, {
-        y: -18,
+        y: -20,
         opacity: 0,
         duration: 0.4,
         stagger: 0.03,
@@ -137,7 +181,7 @@ const firstHeading = headings[0] ?? '';
           heading.textContent = headings[next];
           const incoming = SplitText.create(heading, { type: 'words' });
           gsap.from(incoming.words, {
-            y: 18,
+            y: 20,
             opacity: 0,
             duration: 0.5,
             stagger: 0.03,
@@ -148,35 +192,39 @@ const firstHeading = headings[0] ?? '';
       });
     }
 
-    setInterval(rotate, 5000);
+    setInterval(rotate, 4500);
   }
 
-  // The ribbon draws itself in on load, like the rest of the hero — not a
-  // static graphic dropped in already-finished. Same dash-offset technique
-  // as the capability sequence's thread, just triggered on load instead of
-  // scroll, since this is the very first thing in the viewport.
-  if (ribbonPath instanceof SVGPathElement) {
-    const length = ribbonPath.getTotalLength();
-
-    if (prefersReducedMotion) {
-      gsap.set(ribbonPath, { strokeDasharray: length, strokeDashoffset: 0 });
-    } else {
-      gsap.set(ribbonPath, { strokeDasharray: length, strokeDashoffset: length });
-      gsap.to(ribbonPath, {
-        strokeDashoffset: 0,
-        duration: 2.2,
-        delay: 0.2,
-        ease: 'power3.inOut',
-      });
-    }
+  // Draw-in ribbons on load
+  if (ribbonPath instanceof SVGPathElement && !prefersReducedMotion) {
+    const len1 = ribbonPath.getTotalLength();
+    gsap.set(ribbonPath, { strokeDasharray: len1, strokeDashoffset: len1 });
+    gsap.to(ribbonPath, { strokeDashoffset: 0, duration: 2.5, delay: 0.3, ease: 'power3.inOut' });
   }
 
-  // Ambient drift on the background aura — cinematic atmosphere, not decoration.
-  if (auraEl instanceof HTMLElement && !prefersReducedMotion) {
-    gsap.to(auraEl, {
-      x: '+=60',
-      y: '-=40',
-      duration: 9,
+  if (ribbonPath2 instanceof SVGPathElement && !prefersReducedMotion) {
+    const len2 = ribbonPath2.getTotalLength();
+    gsap.set(ribbonPath2, { strokeDasharray: len2, strokeDashoffset: len2 });
+    gsap.to(ribbonPath2, { strokeDashoffset: 0, duration: 3.0, delay: 0.6, ease: 'power3.inOut' });
+  }
+
+  // Ambient drift on aura blobs
+  if (auraViolet instanceof HTMLElement && !prefersReducedMotion) {
+    gsap.to(auraViolet, {
+      x: '+=80',
+      y: '-=50',
+      duration: 10,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+
+  if (auraRed instanceof HTMLElement && !prefersReducedMotion) {
+    gsap.to(auraRed, {
+      x: '-=60',
+      y: '+=40',
+      duration: 13,
       ease: 'sine.inOut',
       yoyo: true,
       repeat: -1,
@@ -192,58 +240,87 @@ const firstHeading = headings[0] ?? '';
     display: flex;
     align-items: center;
     padding-block: var(--section-pad);
+    background: var(--color-bg);
   }
 
+  /* Multi-layer aura system */
   .hero__aura {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    inset: 0;
     z-index: 0;
-    width: min(70rem, 140vw);
-    height: min(70rem, 140vw);
-    transform: translate(-50%, -50%);
-    background:
-      radial-gradient(circle at 30% 30%, rgba(255, 83, 53, 0.22), transparent 55%),
-      radial-gradient(circle at 70% 65%, rgba(124, 92, 255, 0.18), transparent 55%);
-    filter: blur(70px);
     pointer-events: none;
+    overflow: hidden;
   }
 
-  /* The ribbon sits to the right of the hero text, bleeding off the top
-     and bottom edges — "slice" so it always fills its box rather than
-     letterboxing on unusual viewport ratios. */
+  .hero__aura-violet {
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 75vw;
+    height: 75vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 245, 0.25), transparent 65%);
+    filter: blur(60px);
+  }
+
+  .hero__aura-red {
+    position: absolute;
+    top: 10%;
+    right: -20%;
+    width: 70vw;
+    height: 70vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232, 67, 31, 0.2), transparent 60%);
+    filter: blur(80px);
+  }
+
+  /* Subtle grid overlay for tech depth */
+  .hero__aura-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 70%);
+  }
+
   .hero__ribbon {
     position: absolute;
     top: 0;
-    right: -8%;
+    right: -5%;
     z-index: 0;
-    width: min(46rem, 75vw);
+    width: min(52rem, 80vw);
     height: 100%;
     pointer-events: none;
+    opacity: 0.9;
   }
 
-  .hero__ribbon-glow {
-    opacity: 0.6;
+  .hero__ribbon-bg {
+    opacity: 0.35;
   }
 
   .hero__inner {
     position: relative;
     z-index: 1;
-    max-width: 50rem;
+    max-width: 52rem;
   }
 
   .hero__heading {
     margin-top: var(--space-3);
     font-size: var(--fs-hero);
     font-weight: 700;
-    color: var(--color-paper);
+    color: var(--color-ink);
+    line-height: 1.0;
+    letter-spacing: -0.025em;
   }
 
   .hero__subheading {
     margin-top: var(--space-3);
-    max-width: 36ch;
+    max-width: 38ch;
     font-size: var(--fs-body-lg);
-    color: var(--color-steel);
+    color: var(--color-ink-muted);
+    line-height: 1.65;
   }
 
   .hero__ctas {
@@ -253,12 +330,57 @@ const firstHeading = headings[0] ?? '';
     margin-top: var(--space-4);
   }
 
+  /* Stats strip below CTAs */
+  .hero__stats {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .hero__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .hero__stat-value {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+  }
+
+  .hero__stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  .hero__stat-divider {
+    width: 1px;
+    height: 2.5rem;
+    background: var(--color-border);
+    flex-shrink: 0;
+  }
+
   @media (max-width: 60rem) {
-    /* On narrower viewports the ribbon would otherwise cut across the
-       text — fade it back so it reads as atmosphere behind the words
-       rather than competing with them. */
     .hero__ribbon {
-      opacity: 0.35;
+      opacity: 0.3;
+    }
+
+    .hero__stat-divider {
+      display: none;
+    }
+
+    .hero__stats {
+      gap: 1.25rem 2rem;
     }
   }
 </style>
