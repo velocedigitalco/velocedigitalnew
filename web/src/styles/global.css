@@ -1,11 +1,10 @@
+'/* =============================================================\n   Veloce Digital — Global Styles\n '
+Length: 4993
 /* =============================================================
    Veloce Digital — Global Styles
-   Hand-written, no framework. Mobile-first: base rules target
-   small screens, min-width media queries layer on larger ones.
-
-   Visual language: long-exposure light-trails — the way speed
-   actually looks in a photograph. Warm/cool gradient glow,
-   generous space, large confident type, fluid easing.
+   Dark-mode-first. Visual language: long-exposure light-trails
+   on black — the way speed actually looks photographed at night.
+   Deep blacks, violet/crimson gradient glows, confident type.
    ============================================================= */
 
 /* ---------- Reset ---------- */
@@ -17,6 +16,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body,
@@ -53,29 +53,44 @@ button {
 
 /* ---------- Design tokens ---------- */
 :root {
-  /* Color */
-  --color-ink: #f7f6f2;
-  --color-ink-deep: #ffffff;
-  --color-panel: #ffffff;
-  --color-hairline: rgba(10, 11, 15, 0.12);
-  --color-paper: #14151a;
-  --color-steel: #565d6b;
-  --color-steel-dim: #8b92a0;
+  /* Dark palette */
+  --color-bg: #08090d;
+  --color-bg-surface: #0f1017;
+  --color-bg-elevated: #13141c;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-bright: rgba(255, 255, 255, 0.16);
+
+  /* Text */
+  --color-ink: #f0eee8;
+  --color-ink-muted: #8b8fa8;
+  --color-ink-dim: #484c62;
+
+  /* Legacy aliases (kept for component compat) */
+  --color-paper: #f0eee8;
+  --color-steel: #8b8fa8;
+  --color-steel-dim: #585c72;
+  --color-panel: #0f1017;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+
+  /* Accent */
   --color-redline: #e8431f;
-  --color-redline-dim: #b8330f;
-  --color-violet: #6a45f0;
-  --color-flare: #e0177a;
-  --color-flare-dim: #b30f61;
+  --color-redline-dim: #c23210;
+  --color-violet: #7c5cf5;
+  --color-violet-dim: #5e3fd8;
+  --color-flare: #d4237a;
+  --color-flare-dim: #a81860;
+  --color-cyan: #00d4ff;
+  --color-green: #00e5a0;
 
   /* Type */
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Archivo', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  --fs-hero: clamp(2.75rem, 6vw + 1.4rem, 6.75rem);
-  --fs-h2: clamp(2rem, 3vw + 1rem, 3.25rem);
-  --fs-body-lg: 1.2rem;
-  --fs-eyebrow: 0.75rem;
+  --fs-hero: clamp(2.9rem, 6.5vw + 1.4rem, 7rem);
+  --fs-h2: clamp(2rem, 3vw + 1rem, 3.5rem);
+  --fs-body-lg: 1.15rem;
+  --fs-eyebrow: 0.72rem;
 
   /* Space */
   --space-2: 1rem;
@@ -99,16 +114,16 @@ button {
 
 /* ---------- Base ---------- */
 html {
-  background: var(--color-ink);
-  color-scheme: light;
+  background: var(--color-bg);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--color-bg);
+  color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -118,7 +133,7 @@ h2,
 h3 {
   font-family: var(--font-display);
   line-height: 1.05;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
 }
 
 /* ---------- Accessibility ---------- */
@@ -141,7 +156,7 @@ h3 {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-redline);
+  outline: 2px solid var(--color-violet);
   outline-offset: 3px;
 }
 
@@ -178,16 +193,17 @@ h3 {
   font-family: var(--font-mono);
   font-size: var(--fs-eyebrow);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-steel);
+  color: var(--color-violet);
 }
 
 .eyebrow::before {
   content: '';
-  width: 1.4em;
+  width: 1.6em;
   height: 1px;
-  background: var(--color-redline);
+  background: var(--color-violet);
+  opacity: 0.6;
 }
 
 /* ---------- Buttons ---------- */
@@ -200,7 +216,7 @@ h3 {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   border: 1px solid transparent;
   border-radius: 999px;
   transition:
@@ -216,23 +232,23 @@ h3 {
 }
 
 .btn--primary {
-  background: var(--color-redline);
-  color: var(--color-ink);
-  box-shadow: 0 0 0 rgba(255, 83, 53, 0);
+  background: var(--color-violet);
+  color: #fff;
+  box-shadow: 0 0 0 rgba(124, 92, 245, 0);
 }
 
 .btn--primary:hover {
-  background: var(--color-redline-dim);
-  box-shadow: 0 8px 30px -4px rgba(255, 83, 53, 0.45);
+  background: var(--color-violet-dim);
+  box-shadow: 0 8px 32px -4px rgba(124, 92, 245, 0.5);
 }
 
 .btn--secondary {
-  background: rgba(10, 11, 15, 0.035);
-  border-color: var(--color-hairline);
-  color: var(--color-paper);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border-bright);
+  color: var(--color-ink);
 }
 
 .btn--secondary:hover {
-  border-color: rgba(10, 11, 15, 0.25);
-  background: rgba(10, 11, 15, 0.06);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.09);
 }
