@@ -11,39 +11,36 @@ const { heading = "Let's build something" } = Astro.props;
 
   <div class="contact-form__row">
     <label for="name">Name</label>
-    <input type="text" id="name" name="name" required autocomplete="name" />
+    <input type="text" id="name" name="name" required autocomplete="name" placeholder="Your name" />
   </div>
 
   <div class="contact-form__row">
     <label for="email">Email</label>
-    <input type="email" id="email" name="email" required autocomplete="email" />
+    <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@company.com" />
   </div>
 
   <div class="contact-form__row">
-    <label for="reason">Reason for reaching out</label>
-    <input type="text" id="reason" name="reason" placeholder="e.g. New website, security scan..." />
+    <label for="reason">What do you need?</label>
+    <input type="text" id="reason" name="reason" placeholder="e.g. New website, landing page, web app..." />
   </div>
 
   <div class="contact-form__row">
-    <label for="message">Message</label>
-    <textarea id="message" name="message" rows="5" required></textarea>
+    <label for="message">Tell us more</label>
+    <textarea id="message" name="message" rows="5" required placeholder="Brief overview of your project, timeline, and budget..."></textarea>
   </div>
 
-  <!-- Honeypot: invisible to real visitors (off-screen, not display:none —
-       some bots specifically skip display:none fields), and marked
-       aria-hidden so screen readers skip it too. -->
   <div class="contact-form__honeypot" aria-hidden="true">
     <label for="company">Company</label>
     <input type="text" id="company" name="company" tabindex="-1" autocomplete="off" />
   </div>
 
-  <button class="btn btn--primary" type="submit" data-contact-submit>Send Message</button>
+  <button class="btn btn--primary contact-form__submit" type="submit" data-contact-submit>
+    Send Message →
+  </button>
   <p class="contact-form__status" data-contact-status role="status" aria-live="polite"></p>
 </form>
 
 <script>
-  // Delegated to document so this works no matter how many ContactForm
-  // instances are on the page (homepage + /contact both render one).
   document.querySelectorAll('[data-contact-form]').forEach((form) => {
     if (!(form instanceof HTMLFormElement)) return;
 
@@ -69,7 +66,7 @@ const { heading = "Let's build something" } = Astro.props;
         const data = await res.json().catch(() => ({}));
 
         if (res.ok) {
-          status.textContent = "Thanks — we'll get back to you soon.";
+          status.textContent = "Thanks — we'll be in touch within 24 hours.";
           status.classList.add('contact-form__status--success');
           form.reset();
         } else {
@@ -77,7 +74,7 @@ const { heading = "Let's build something" } = Astro.props;
           status.classList.add('contact-form__status--error');
         }
       } catch {
-        status.textContent = 'Something went wrong. Please try again, or email us directly.';
+        status.textContent = 'Network error. Please email us directly.';
         status.classList.add('contact-form__status--error');
       } finally {
         submitBtn.disabled = false;
@@ -91,42 +88,47 @@ const { heading = "Let's build something" } = Astro.props;
     margin-bottom: var(--space-4);
     font-size: var(--fs-h2);
     font-weight: 600;
-    color: var(--color-paper);
+    color: var(--color-ink);
   }
 
   .contact-form__row {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.45rem;
     margin-bottom: var(--space-3);
   }
 
   .contact-form__row label {
     font-family: var(--font-mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.04em;
-    color: var(--color-steel);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
   }
 
   .contact-form__row input,
   .contact-form__row textarea {
     font: inherit;
     font-size: 0.95rem;
-    color: var(--color-paper);
-    background: var(--color-panel);
-    border: 1px solid var(--color-hairline);
-    padding: 0.65rem 0.8rem;
+    color: var(--color-ink);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    padding: 0.75rem 1rem;
+    border-radius: 0;
+    transition: border-color 0.25s, background 0.25s;
+    resize: vertical;
   }
 
   .contact-form__row input::placeholder,
   .contact-form__row textarea::placeholder {
-    color: var(--color-steel-dim);
+    color: var(--color-ink-dim);
   }
 
   .contact-form__row input:focus,
   .contact-form__row textarea:focus {
-    outline: 2px solid var(--color-flare);
-    outline-offset: 1px;
+    outline: none;
+    border-color: var(--color-violet);
+    background: rgba(124, 92, 245, 0.05);
   }
 
   .contact-form__honeypot {
@@ -137,17 +139,17 @@ const { heading = "Let's build something" } = Astro.props;
     overflow: hidden;
   }
 
+  .contact-form__submit {
+    margin-top: var(--space-2);
+  }
+
   .contact-form__status {
     margin-top: var(--space-2);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     min-height: 1.2em;
+    font-family: var(--font-mono);
   }
 
-  .contact-form__status--success {
-    color: #1a8f4c;
-  }
-
-  .contact-form__status--error {
-    color: var(--color-redline);
-  }
+  .contact-form__status--success { color: var(--color-green); }
+  .contact-form__status--error { color: var(--color-redline); }
 </style>
