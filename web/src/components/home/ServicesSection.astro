@@ -15,9 +15,6 @@ const CATEGORY_LABELS: Record<Service['category'], string> = {
   cloud: 'Cloud',
 };
 
-// Grouped client-side (well, build-side) rather than duplicating a group-by
-// in GROQ — the category order here is deliberate (roughly "what we do
-// today" first, "what's coming" last), not alphabetical.
 const CATEGORY_ORDER: Service['category'][] = ['development', 'security', 'infrastructure', 'cloud'];
 
 const grouped = CATEGORY_ORDER.map((category) => ({
@@ -49,7 +46,7 @@ const grouped = CATEGORY_ORDER.map((category) => ({
                   </div>
                   <h4 class="service-card__title">
                     {service.title}
-                    {service.comingSoon && <span class="service-card__badge">Coming Soon</span>}
+                    {service.comingSoon && <span class="service-card__badge">Soon</span>}
                   </h4>
                   <p class="service-card__description">{service.description}</p>
                 </article>
@@ -75,7 +72,6 @@ const grouped = CATEGORY_ORDER.map((category) => ({
 
   if (headingEl instanceof HTMLElement && !prefersReducedMotion) {
     const split = SplitText.create(headingEl, { type: 'words' });
-
     gsap.timeline({
       defaults: { ease: 'power4.out' },
       scrollTrigger: { trigger: headingEl, start: 'top 85%', once: true },
@@ -91,6 +87,17 @@ const grouped = CATEGORY_ORDER.map((category) => ({
       ease: 'power3.out',
       scrollTrigger: { trigger: '.services__groups', start: 'top 80%', once: true },
     });
+
+    // Hover glow effect per card
+    cards.forEach((card) => {
+      if (!(card instanceof HTMLElement)) return;
+      card.addEventListener('mouseenter', () => {
+        gsap.to(card, { '--card-glow': '1', duration: 0.3 });
+      });
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, { '--card-glow': '0', duration: 0.4 });
+      });
+    });
   }
 </script>
 
@@ -104,7 +111,7 @@ const grouped = CATEGORY_ORDER.map((category) => ({
     max-width: 40ch;
     font-size: var(--fs-h2);
     font-weight: 600;
-    color: var(--color-paper);
+    color: var(--color-ink);
   }
 
   .services__groups {
@@ -116,31 +123,52 @@ const grouped = CATEGORY_ORDER.map((category) => ({
 
   .services__category {
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-flare);
+    color: var(--color-violet);
+    margin-bottom: var(--space-3);
   }
 
   .services__grid {
-    margin-top: var(--space-3);
     display: grid;
     gap: 1px;
-    background: var(--color-hairline);
-    border: 1px solid var(--color-hairline);
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
     grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   }
 
   .service-card {
+    position: relative;
     padding: var(--space-4);
-    background: var(--color-panel);
+    background: var(--color-bg-surface);
+    transition: background 0.3s;
+    overflow: hidden;
+  }
+
+  .service-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(124, 92, 245, 0.12), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+
+  .service-card:hover::before {
+    opacity: 1;
+  }
+
+  .service-card:hover {
+    background: var(--color-bg-elevated);
   }
 
   .service-card__icon {
     width: 2rem;
     height: 2rem;
-    color: var(--color-redline);
+    color: var(--color-violet);
   }
 
   .service-card__title {
@@ -149,26 +177,27 @@ const grouped = CATEGORY_ORDER.map((category) => ({
     align-items: center;
     gap: 0.6rem;
     margin-top: var(--space-3);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 600;
-    color: var(--color-paper);
+    color: var(--color-ink);
   }
 
   .service-card__badge {
-    padding: 0.15rem 0.5rem;
+    padding: 0.15rem 0.55rem;
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 500;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-steel);
-    border: 1px solid var(--color-hairline);
+    color: var(--color-violet);
+    border: 1px solid rgba(124, 92, 245, 0.3);
+    border-radius: 999px;
   }
 
   .service-card__description {
-    margin-top: 0.6rem;
-    font-size: 0.92rem;
-    line-height: 1.6;
-    color: var(--color-steel);
+    margin-top: 0.65rem;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
   }
 </style>
