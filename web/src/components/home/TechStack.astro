@@ -1,45 +1,476 @@
 ---
-const STACK = ['Astro', 'TypeScript', 'GSAP', 'Sanity', 'Cloudflare'];
+// TechStack.astro — scrollytelling section showing what Veloce Digital builds with.
+// Each tech card animates in on scroll, SVG logos inline (no hotlinking).
+// Grid of primary stack, then a secondary "also proficient in" row.
+
+const PRIMARY_STACK = [
+  {
+    name: 'Next.js',
+    tagline: 'Production-grade React',
+    description: 'Server components, edge rendering, ISR — we ship Next.js apps that score green on every Core Web Vital.',
+    color: '#ffffff',
+    svgPath: `<path d="M11.572 0c-.176 0-.31.001-.358.007a19.76 19.76 0 0 1-.364.033C7.443.346 4.25 2.185 2.228 5.012a11.875 11.875 0 0 0-2.119 5.243c-.096.659-.108.854-.108 1.747s.012 1.089.108 1.748c.652 4.506 3.86 8.292 8.209 9.695.779.25 1.6.422 2.534.525.363.04 1.935.04 2.299 0 1.611-.178 2.977-.577 4.323-1.264.207-.106.247-.134.219-.158-.02-.013-.9-1.193-1.955-2.62l-1.919-2.592-2.404-3.558a338.739 338.739 0 0 0-2.422-3.556c-.009-.002-.018 1.579-.023 3.51-.007 3.38-.01 3.515-.052 3.595a.426.426 0 0 1-.206.214c-.075.037-.14.044-.495.044H7.81l-.108-.068a.438.438 0 0 1-.157-.171l-.05-.106.006-4.703.007-4.705.072-.092a.645.645 0 0 1 .174-.143c.096-.047.134-.051.54-.051.478 0 .558.018.682.154.035.038 1.337 1.999 2.895 4.361a10760.433 10760.433 0 0 0 4.735 7.17l1.9 2.879.096-.063a12.317 12.317 0 0 0 2.466-2.163 11.944 11.944 0 0 0 2.824-6.134c.096-.66.108-.854.108-1.748 0-.893-.012-1.088-.108-1.747-.652-4.506-3.859-8.292-8.208-9.695a12.597 12.597 0 0 0-2.499-.523A33.119 33.119 0 0 0 11.573 0zm4.069 7.217c.347 0 .408.005.486.047a.473.473 0 0 1 .237.277c.018.06.023 1.365.018 4.304l-.006 4.218-.744-1.14-.746-1.14v-3.066c0-1.982.01-3.097.023-3.15a.478.478 0 0 1 .233-.296c.096-.05.13-.054.499-.054z"/>`,
+    viewBox: '0 0 24 24',
+  },
+  {
+    name: 'React',
+    tagline: 'Component architecture',
+    description: 'From complex SaaS UIs to headless storefronts, we architect React at scale with performance baked in from day one.',
+    color: '#61dafb',
+    svgPath: `<circle cx="12" cy="11.245" r="1.785"/><path d="M7.002 14.794l-.395-.101a9.802 9.802 0 0 1-1.59-.534 4.94 4.94 0 0 1-1.529-1.038 2.2 2.2 0 0 1-.63-1.572 2.226 2.226 0 0 1 .63-1.569 4.94 4.94 0 0 1 1.53-1.039 9.828 9.828 0 0 1 1.59-.534l.395-.1.109.391a12.76 12.76 0 0 0 .481 1.381l.109.258-.219.188a3.593 3.593 0 0 0-.935.993 1.973 1.973 0 0 0-.316 1.032c0 .382.108.67.316 1.031.228.378.546.7.936.994l.219.188-.109.257a12.791 12.791 0 0 0-.481 1.382l-.11.392zm9.996 0l-.11-.392a12.76 12.76 0 0 0-.481-1.381l-.109-.257.219-.189a3.596 3.596 0 0 0 .935-.993 1.965 1.965 0 0 0 .316-1.031c0-.382-.108-.67-.316-1.032a3.591 3.591 0 0 0-.935-.993l-.219-.188.109-.258a12.76 12.76 0 0 0 .481-1.381l.11-.391.394.101a9.832 9.832 0 0 1 1.59.534 4.94 4.94 0 0 1 1.529 1.038 2.2 2.2 0 0 1 .63 1.569 2.2 2.2 0 0 1-.63 1.572 4.94 4.94 0 0 1-1.53 1.037 9.831 9.831 0 0 1-1.59.535zM8.55 8.62l-.187-.364a12.55 12.55 0 0 0-.724-1.195l-.232-.316.34-.163c.533-.254 1.074-.458 1.619-.612.558-.158 1.117-.268 1.676-.33.559-.062 1.118-.093 1.677-.092.559-.001 1.118.03 1.677.092.559.062 1.118.172 1.675.33.546.154 1.087.358 1.62.612l.339.163-.232.316a12.52 12.52 0 0 0-.725 1.195l-.186.364-.369-.188a10.148 10.148 0 0 0-1.437-.594 10.03 10.03 0 0 0-1.49-.325 10.337 10.337 0 0 0-1.527-.116 10.337 10.337 0 0 0-1.528.116 10.03 10.03 0 0 0-1.489.325 10.14 10.14 0 0 0-1.438.594l-.368.188zm6.9 5.224l.187.364c.23.452.467.868.724 1.195l.232.316-.34.163a9.823 9.823 0 0 1-1.619.612 10.127 10.127 0 0 1-1.676.33 10.337 10.337 0 0 1-1.677.093 10.337 10.337 0 0 1-1.677-.093 10.14 10.14 0 0 1-1.675-.33 9.815 9.815 0 0 1-1.62-.612l-.339-.163.232-.316a12.58 12.58 0 0 0 .725-1.195l.186-.364.368.188c.45.231.937.43 1.438.594.5.162 1.002.276 1.489.326.505.055 1.014.082 1.528.082.514 0 1.023-.027 1.527-.082a10.103 10.103 0 0 0 1.49-.326 10.12 10.12 0 0 0 1.437-.594l.369-.188z"/>`,
+    viewBox: '0 0 24 24',
+  },
+  {
+    name: 'TypeScript',
+    tagline: 'Type-safe by default',
+    description: 'Every project we ship is fully typed. TypeScript catches bugs at build time, not 2 AM in production.',
+    color: '#3178c6',
+    svgPath: `<path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/>`,
+    viewBox: '0 0 24 24',
+  },
+  {
+    name: 'Astro',
+    tagline: 'Content-first speed',
+    description: 'Zero JS by default, island architecture for interactivity only where needed. Our sites load fast because Astro ships less.',
+    color: '#ff5d01',
+    svgPath: `<path d="M8.358 20.162c-1.186-1.07-1.532-3.316-1.038-4.944.856 1.026 2.043 1.352 3.272 1.535 1.897.275 3.76.167 5.557-.5.191-.071.383-.147.575-.223l.17.498c-.328 1.4-.086 2.62.6 3.759.1.16.21.316.325.467-.21.073-.44.12-.693.12-1.48 0-2.842-.87-3.786-1.934-.38.498-.736.992-1.066 1.495-.36-.594-.692-1.2-.916-1.273zm9.064-3.462c-.04.02-.08.04-.12.062.015-.039.031-.078.046-.117l.074-.003zm-3.614-9.99c.97 1.43 1.413 3.267 1.32 5.078l-.02.394c-.46.35-.98.65-1.565.896-1.447.61-3.09.753-4.72.418-1.63-.335-3.12-1.197-4.14-2.418-.024-.029-.047-.059-.07-.088l.038-.027c.79-.545 1.69-.953 2.662-1.18a8.337 8.337 0 0 1 3.5-.087c.456.098.893.258 1.322.445.193.084.384.174.573.268zm-8.35-2.665c.36-.09.717-.167 1.066-.232l.12-.018a13.46 13.46 0 0 1 2.39-.112 13.398 13.398 0 0 1 2.345.321c-.17.096-.34.19-.512.284-1.282.698-2.66 1.29-4.01 1.843-.46.187-.918.37-1.373.558-.46-.61-.899-1.236-1.295-1.875.42-.27.85-.524 1.269-.769zm11.38 4.655c-.19.67-.441 1.32-.762 1.93-.054.103-.11.206-.166.308-.17-.145-.34-.29-.51-.435-1.28-1.098-2.603-2.14-3.938-3.157-.83-.634-1.67-1.25-2.51-1.86l.025-.01c1.07-.418 2.09-.905 3.09-1.432.77.78 1.48 1.62 2.11 2.53.35.51.675 1.038.97 1.584.138.262.268.53.39.803.1.22.195.445.281.673zm-10.76-8.27c1.12-.78 2.407-1.19 3.736-1.19 1.31 0 2.587.4 3.707 1.167-.19.113-.382.225-.574.34-1.29.757-2.553 1.55-3.792 2.377-.44.294-.876.594-1.308.898a19.8 19.8 0 0 1-1.769-3.592z"/>`,
+    viewBox: '0 0 24 24',
+  },
+  {
+    name: 'Cloudflare',
+    tagline: 'Edge-first infrastructure',
+    description: 'Pages, Workers, R2, D1 — we deploy and operate on Cloudflare\'s global edge network. Blazing fast from Lahore to London.',
+    color: '#f38020',
+    svgPath: `<path d="M16.679 15.557l.239-1.269-.168-.1c-.34-.2-.766-.31-1.212-.31H7.174a.357.357 0 0 1-.338-.24.337.337 0 0 1 .126-.39l.029-.02c2.073-1.494 4.438-2.284 6.83-2.284.867 0 1.73.11 2.565.327l.239.065.065-.236C17.194 9.45 18.476 8 20.06 8c2.098 0 3.806 1.695 3.806 3.778 0 .2-.017.401-.051.597l-.06.348.354.005c1.006.016 1.831.84 1.831 1.849 0 1.01-.822 1.832-1.834 1.832H16.89l-.211-1.852zm5.427.758c1.234 0 2.236-.997 2.236-2.224 0-1.196-.944-2.164-2.133-2.22.029-.218.044-.435.044-.649C22.253 9.1 20.334 7.2 18 7.2c-1.875 0-3.405 1.185-4.04 2.896a9.35 9.35 0 0 0-2.786-.422c-2.57 0-5.096.866-7.317 2.508a.742.742 0 0 0-.24.856.77.77 0 0 0 .724.527h7.72c.279 0 .548.067.788.196l-.17.9H3.327c-.65 0-1.238.35-1.564.916a1.823 1.823 0 0 0 0 1.831c.326.565.913.915 1.564.915h18.779z"/>`,
+    viewBox: '0 0 24 24',
+  },
+  {
+    name: 'Sanity',
+    tagline: 'Structured content layer',
+    description: 'Real-time collaborative CMS with GROQ querying. We wire Sanity to any frontend so editors work without touching code.',
+    color: '#f03e2f',
+    svgPath: `<path d="M10.427 13.732c0 2.214 1.507 3.657 4.067 3.657 1.244 0 2.31-.305 3.215-.914v-2.626a4.453 4.453 0 0 1-2.773.947c-1.356 0-2.133-.7-2.133-1.833 0-1.133.777-1.83 2.133-1.83.99 0 1.89.31 2.773.946V9.453c-.905-.608-1.97-.914-3.215-.914-2.56 0-4.067 1.45-4.067 3.666v1.527zm1.06-4.786C9.68 8.208 8.63 6.65 8.63 5.162c0-1.7 1.197-2.824 3.083-2.824 1.04 0 2.005.356 2.773.915V5.82c-.768-.558-1.643-.84-2.5-.84-.736 0-1.13.302-1.13.828 0 .633.558 1.068 1.688 1.455l.648.214c2.097.69 3.197 1.958 3.197 3.703 0 .223-.023.434-.065.639-.675-.765-1.603-1.22-2.9-1.22-1.26 0-2.273.417-2.937 1.133z"/>`,
+    viewBox: '0 0 24 24',
+  },
+];
+
+const SECONDARY_STACK = [
+  { name: 'GSAP', color: '#88CE02' },
+  { name: 'Tailwind CSS', color: '#06B6D4' },
+  { name: 'Node.js', color: '#5FA04E' },
+  { name: 'PostgreSQL', color: '#4169E1' },
+  { name: 'Vercel', color: '#ffffff' },
+  { name: 'GitHub', color: '#ffffff' },
+  { name: 'Figma', color: '#F24E1E' },
+  { name: 'GraphQL', color: '#E10098' },
+  { name: 'Stripe', color: '#635BFF' },
+  { name: 'Supabase', color: '#3ECF8E' },
+];
 ---
 
-<section class="tech-stack">
-  <div class="container tech-stack__inner">
-    <p class="tech-stack__label">Built with</p>
-    <ul class="tech-stack__list">
-      {STACK.map((tech) => <li>{tech}</li>)}
+<section class="techstack" id="tech-stack">
+  <!-- Background atmospheric glow -->
+  <div class="techstack__bg" aria-hidden="true">
+    <div class="techstack__bg-glow techstack__bg-glow--violet"></div>
+    <div class="techstack__bg-glow techstack__bg-glow--red"></div>
+  </div>
+
+  <div class="container">
+    <p class="eyebrow" data-tech-eyebrow>Technology Stack</p>
+    <h2 class="techstack__heading" data-tech-heading>
+      Built on technologies<br />
+      <span class="techstack__heading-accent">the best teams trust</span>
+    </h2>
+    <p class="techstack__sub" data-tech-sub>
+      We don't chase trends. We build with proven, high-performance tools
+      that production-grade teams use to ship fast and scale without drama.
+    </p>
+  </div>
+
+  <!-- Primary stack grid -->
+  <div class="container techstack__grid-wrap">
+    <div class="techstack__grid" data-tech-grid>
+      {PRIMARY_STACK.map((tech, i) => (
+        <article
+          class="tech-card"
+          data-tech-card
+          style={`--tech-color: ${tech.color}; --tech-index: ${i};`}
+        >
+          <div class="tech-card__glow" aria-hidden="true"></div>
+          <div class="tech-card__icon" aria-hidden="true">
+            <svg viewBox={tech.viewBox} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <Fragment set:html={tech.svgPath} />
+            </svg>
+          </div>
+          <div class="tech-card__body">
+            <h3 class="tech-card__name">{tech.name}</h3>
+            <p class="tech-card__tagline">{tech.tagline}</p>
+            <p class="tech-card__description">{tech.description}</p>
+          </div>
+          <div class="tech-card__shine" aria-hidden="true"></div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <!-- Secondary / also-proficient-in strip -->
+  <div class="container techstack__also-wrap" data-tech-also>
+    <p class="techstack__also-label">Also in our toolkit</p>
+    <ul class="techstack__also-list">
+      {SECONDARY_STACK.map((tech) => (
+        <li class="techstack__also-item" style={`--tech-color: ${tech.color};`}>
+          <span class="techstack__also-dot" aria-hidden="true"></span>
+          {tech.name}
+        </li>
+      ))}
     </ul>
   </div>
 </section>
 
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  const eyebrowEl = document.querySelector('[data-tech-eyebrow]');
+  const headingEl = document.querySelector('[data-tech-heading]');
+  const subEl = document.querySelector('[data-tech-sub]');
+  const cards = Array.from(document.querySelectorAll('[data-tech-card]'));
+  const alsoWrap = document.querySelector('[data-tech-also]');
+
+  // --- Scroll entrance: staggered card reveal ---
+  if (!prefersReducedMotion) {
+    // Header text
+    if (eyebrowEl && headingEl && subEl) {
+      gsap.from([eyebrowEl, headingEl, subEl], {
+        y: 28,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power4.out',
+        scrollTrigger: { trigger: eyebrowEl, start: 'top 88%', once: true },
+      });
+    }
+
+    // Cards: each flies up from below with slight Y offset per column
+    if (cards.length) {
+      gsap.from(cards, {
+        y: 50,
+        opacity: 0,
+        duration: 0.75,
+        stagger: {
+          amount: 0.6,
+          grid: [2, 3],
+          from: 'start',
+        },
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '[data-tech-grid]',
+          start: 'top 82%',
+          once: true,
+        },
+      });
+    }
+
+    // Also-in-toolkit line
+    if (alsoWrap) {
+      gsap.from(alsoWrap, {
+        y: 20,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: alsoWrap, start: 'top 90%', once: true },
+      });
+    }
+  }
+
+  // --- Hover: follow-cursor spotlight glow per card ---
+  if (supportsHover && !prefersReducedMotion) {
+    cards.forEach((card) => {
+      if (!(card instanceof HTMLElement)) return;
+      const glow = card.querySelector('.tech-card__glow');
+      if (!(glow instanceof HTMLElement)) return;
+
+      const setX = gsap.quickTo(glow, '--glow-x', { duration: 0.3, ease: 'power2' });
+      const setY = gsap.quickTo(glow, '--glow-y', { duration: 0.3, ease: 'power2' });
+
+      card.addEventListener('mouseenter', () => {
+        gsap.to(glow, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+        gsap.to(card, { '--card-border-opacity': 0.4, duration: 0.3 });
+      });
+
+      card.addEventListener('mousemove', (e) => {
+        if (!(e instanceof MouseEvent)) return;
+        const rect = card.getBoundingClientRect();
+        setX(e.clientX - rect.left);
+        setY(e.clientY - rect.top);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        gsap.to(glow, { opacity: 0, duration: 0.4 });
+        gsap.to(card, { '--card-border-opacity': 0, duration: 0.4 });
+      });
+    });
+  }
+</script>
+
 <style>
-  .tech-stack {
-    padding-top: var(--space-5);
+  .techstack {
+    position: relative;
+    padding-top: var(--section-pad);
+    padding-bottom: var(--section-pad);
+    overflow: hidden;
   }
 
-  .tech-stack__inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3);
+  /* Atmospheric background glows */
+  .techstack__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
   }
 
-  .tech-stack__label {
+  .techstack__bg-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.18;
+  }
+
+  .techstack__bg-glow--violet {
+    width: 60vw;
+    height: 60vw;
+    background: var(--color-violet);
+    top: -20%;
+    left: -15%;
+  }
+
+  .techstack__bg-glow--red {
+    width: 50vw;
+    height: 50vw;
+    background: var(--color-flare);
+    bottom: -15%;
+    right: -10%;
+  }
+
+  /* Ensure content sits above bg */
+  .techstack .container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .techstack__heading {
+    margin-top: var(--space-3);
+    font-size: var(--fs-h2);
+    font-weight: 700;
+    color: var(--color-ink);
+    line-height: 1.08;
+  }
+
+  .techstack__heading-accent {
+    background: linear-gradient(90deg, var(--color-violet), var(--color-flare));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .techstack__sub {
+    margin-top: var(--space-3);
+    max-width: 44ch;
+    font-size: var(--fs-body-lg);
+    color: var(--color-ink-muted);
+    line-height: 1.65;
+  }
+
+  /* ---- Primary grid ---- */
+  .techstack__grid-wrap {
+    margin-top: var(--space-5);
+  }
+
+  .techstack__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 40rem) {
+    .techstack__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .techstack__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* ---- Tech card ---- */
+  .tech-card {
+    position: relative;
+    overflow: hidden;
+    padding: var(--space-4);
+    background: var(--color-bg-surface);
+    transition: background 0.35s;
+    cursor: default;
+    --card-border-opacity: 0;
+  }
+
+  .tech-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(var(--tech-color-rgb, 255 255 255) / var(--card-border-opacity, 0));
+    pointer-events: none;
+    transition: border-color 0.3s;
+  }
+
+  /* Cursor-tracked radial spotlight */
+  .tech-card__glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 320px;
+    height: 320px;
+    transform: translate(calc(var(--glow-x, 160px) - 160px), calc(var(--glow-y, 160px) - 160px));
+    border-radius: 50%;
+    background: radial-gradient(circle at center, var(--tech-color) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    filter: blur(2px);
+    mix-blend-mode: screen;
+  }
+
+  .tech-card__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--tech-color);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s var(--ease-out);
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--tech-color) 40%, transparent));
+  }
+
+  .tech-card:hover .tech-card__icon {
+    transform: scale(1.12);
+  }
+
+  .tech-card__icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .tech-card__body {
+    position: relative;
+    z-index: 1;
+    margin-top: var(--space-3);
+  }
+
+  .tech-card__name {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+  }
+
+  .tech-card__tagline {
+    margin-top: 0.3rem;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-steel-dim);
+    color: var(--tech-color);
+    opacity: 0.85;
   }
 
-  .tech-stack__list {
+  .tech-card__description {
+    margin-top: 0.85rem;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--color-ink-muted);
+  }
+
+  /* Diagonal shine on hover */
+  .tech-card__shine {
+    position: absolute;
+    top: -60%;
+    left: -60%;
+    width: 140%;
+    height: 220%;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.025) 50%,
+      transparent 60%
+    );
+    transform: translateX(-100%);
+    pointer-events: none;
+    z-index: 2;
+    transition: transform 0s;
+  }
+
+  .tech-card:hover .tech-card__shine {
+    transform: translateX(160%);
+    transition: transform 0.6s var(--ease-fluid);
+  }
+
+  /* ---- Secondary toolkit ---- */
+  .techstack__also-wrap {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .techstack__also-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+    margin-bottom: var(--space-3);
+  }
+
+  .techstack__also-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
+    gap: 0.75rem 1.5rem;
   }
 
-  .tech-stack__list li {
+  .techstack__also-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--color-steel);
+    font-size: 0.82rem;
+    color: var(--color-ink-muted);
+    transition: color 0.25s;
+  }
+
+  .techstack__also-item:hover {
+    color: var(--tech-color);
+  }
+
+  .techstack__also-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--tech-color);
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+
+  .techstack__also-item:hover .techstack__also-dot {
+    opacity: 1;
+    transform: scale(1.4);
   }
 </style>
